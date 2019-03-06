@@ -215,6 +215,8 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 	processTable[PID].initialPhysicalAddress=initialPhysicalAddress;
 	processTable[PID].processSize=processSize;
 	processTable[PID].state=NEW;
+	ComputerSystem_DebugMessage(111, SYSPROC, programList[processTable[PID].programListIndex]->executableName);
+	
 	processTable[PID].priority=priority;
 	processTable[PID].programListIndex=processPLIndex;
 	// Daemons run in protected mode and MMU use real address
@@ -235,7 +237,10 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 void OperatingSystem_MoveToTheREADYState(int PID) {
 	
 	if (Heap_add(PID, readyToRunQueue,QUEUE_PRIORITY ,&numberOfReadyToRunProcesses ,PROCESSTABLEMAXSIZE)>=0) {
+		int anterior = processTable[PID].state;
 		processTable[PID].state=READY;
+		ComputerSystem_DebugMessage(110, SYSPROC, programList[processTable[PID].programListIndex]->executableName, statesNames[anterior], statesNames[processTable[PID].state]);
+		
 	} 
 	OperatingSystem_PrintReadyToRunQueue();
 }
@@ -272,7 +277,10 @@ void OperatingSystem_Dispatch(int PID) {
 	// The process identified by PID becomes the current executing process
 	executingProcessID=PID;
 	// Change the process' state
+	int anterior = processTable[PID].state;
 	processTable[PID].state=EXECUTING;
+	ComputerSystem_DebugMessage(110, SYSPROC, programList[processTable[PID].programListIndex]->executableName, statesNames[anterior], statesNames[processTable[PID].state]);
+		
 	// Modify hardware registers with appropriate values for the process identified by PID
 	OperatingSystem_RestoreContext(PID);
 }
@@ -329,8 +337,10 @@ void OperatingSystem_HandleException() {
 void OperatingSystem_TerminateProcess() {
   
 	int selectedProcess;
-  	
+  	int anterior = processTable[executingProcessID].state;
 	processTable[executingProcessID].state=EXIT;
+	ComputerSystem_DebugMessage(110, SYSPROC, programList[processTable[executingProcessID].programListIndex]->executableName, statesNames[anterior], statesNames[processTable[executingProcessID].state]);
+	
 	
 	if (programList[processTable[executingProcessID].programListIndex]->type==USERPROGRAM) 
 		// One more user process that has terminated

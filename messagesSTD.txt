@@ -12,5 +12,5 @@
 107,<tab>[@G%d@@,%d]
 108,, [@G%d@@,%d]
 109,\n
-110,Process [@G%s@@] moving from the [@G%s@@] state to the [@G%s@@] state
-111,New process [@G%s@@] moving to the [@G%s@@] state
+110,Process [@G%s@@] moving from the [@G%s@@] state to the [@G%s@@] state\n
+111,New process [@G%s@@] moving to the [@GNEW@@] state\n
