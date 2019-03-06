@@ -25,6 +25,11 @@ void ComputerSystem_PowerOn(int argc, char *argv[]) {
 	// Obtain a list of programs in the command line and debus sections
 	int daemonsBaseIndex = ComputerSystem_ObtainProgramList(argc, argv);
 
+	/*Ejercicio 2:
+	Muestra la información del ejercicio 1, justo antes de la inicialización del sistema operativo
+	en ComputerSystem_PowerOn()*/
+	ComputerSystem_PrintProgramList();
+
 	int na=Asserts_LoadAsserts();
 	if (na==-1)
 		// printf("Asserts file unavailable\n");
