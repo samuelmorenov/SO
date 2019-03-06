@@ -1,0 +1,8 @@
+*.o 
+*~ 
+*.mc 
+*.acc 
+Aspect.c 
+ProcessorAspect.c 
+OperatingSystemAspect.c 
+core
