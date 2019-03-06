@@ -7,3 +7,8 @@
 101,User program list:\n
 102,\tProgram [@C%s@@] with arrival time [@C%d@@]\n
 103,@RERROR: There are not free entries in the process table for the program [%s]@@\n
+
+106,Ready-to-run processes queue:\n
+107,<tab>[@G%d@@,%d]
+108,, [@G%d@@,%d]
+109,\n

@@ -233,6 +233,7 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 	if (Heap_add(PID, readyToRunQueue,QUEUE_PRIORITY ,&numberOfReadyToRunProcesses ,PROCESSTABLEMAXSIZE)>=0) {
 		processTable[PID].state=READY;
 	} 
+	OperatingSystem_PrintReadyToRunQueue();
 }
 
 
@@ -376,3 +377,41 @@ void OperatingSystem_InterruptLogic(int entryPoint){
 
 }
 
+/*
+Estudia la estructura de datos que contiene la lista de procesos listos para su ejecución.
+a. Implementa una función denominada OperatingSystem_PrintReadyToRunQueue()
+que muestre en pantalla el contenido de la cola de procesos LISTOS. Para mostrar la
+información en la pantalla se tendrá que usar la función ComputerSystem_DebugMessage(),
+utilizando los números de mensajes 106 y sucesivos, y la constante SHORTTERMSCHEDULE
+como valor para el segundo argumento de la misma (sección de interés).
+El mensaje mostrado deberá tener el aspecto siguiente:
+Ready-to-run processes queue:
+<tab>[1,0], [3,2], [0,100]
+Donde los números en verde se refieren a identificadores de procesos (PID’s)
+incluidos en cola y los números en color negro, serán sus prioridades.
+V1: Simulador de un Sistema Informático Multiprogramado 17
+b. Añade una invocación a la función recién creada al final de la función
+OperatingSystem_MoveToTheREADYState().
+*/
+void OperatingSystem_PrintReadyToRunQueue(){
+	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
+
+	//int a[17];
+	//size_t n = sizeof(readyToRunQueue)/sizeof(readyToRunQueue[0]);
+
+	int i = 0;
+	for (i=0; i<numberOfReadyToRunProcesses; i++) {
+		int identificador = readyToRunQueue[i];
+		int prioridad = processTable[identificador].priority;
+
+		if(i == 0){
+			ComputerSystem_DebugMessage(107, SHORTTERMSCHEDULE, identificador, prioridad);
+		}
+		else{
+			ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE, identificador, prioridad);
+		}
+		
+	}
+	ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
+	
+}
