@@ -1,0 +1,7 @@
+//4  // Tamanio del programa en posiciones de memoria 
+100 // Prioridad del proceso generado (MUY baja prioridad) 
+//Comentario
+NOP
+NOP
+NOP
+TRAP 3
