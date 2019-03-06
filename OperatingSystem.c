@@ -50,6 +50,9 @@ int numberOfReadyToRunProcesses=0;
 // Variable containing the number of not terminated user processes
 int numberOfNotTerminatedUserProcesses=0;
 
+//Ejercicio 10
+char * statesNames [5]={"NEW","READY","EXECUTING","BLOCKED","EXIT"};
+
 // Initial set of tasks of the OS
 void OperatingSystem_Initialize(int daemonsIndex) {
 	
@@ -378,20 +381,7 @@ void OperatingSystem_InterruptLogic(int entryPoint){
 }
 
 /*
-Estudia la estructura de datos que contiene la lista de procesos listos para su ejecución.
-a. Implementa una función denominada OperatingSystem_PrintReadyToRunQueue()
-que muestre en pantalla el contenido de la cola de procesos LISTOS. Para mostrar la
-información en la pantalla se tendrá que usar la función ComputerSystem_DebugMessage(),
-utilizando los números de mensajes 106 y sucesivos, y la constante SHORTTERMSCHEDULE
-como valor para el segundo argumento de la misma (sección de interés).
-El mensaje mostrado deberá tener el aspecto siguiente:
-Ready-to-run processes queue:
-<tab>[1,0], [3,2], [0,100]
-Donde los números en verde se refieren a identificadores de procesos (PID’s)
-incluidos en cola y los números en color negro, serán sus prioridades.
-V1: Simulador de un Sistema Informático Multiprogramado 17
-b. Añade una invocación a la función recién creada al final de la función
-OperatingSystem_MoveToTheREADYState().
+Ejerccio 9
 */
 void OperatingSystem_PrintReadyToRunQueue(){
 	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
