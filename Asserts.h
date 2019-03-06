@@ -31,6 +31,8 @@ enum assertList {
 ,MMBR_O1=21		// Main MEMory Memory Memory Buffers Register Operator 1
 ,MMBR_O2=22		// Main MEMory Memory Memory Buffer Register Operator 2
 ,XPID=23		// eXecuting PID
+,RMEM=24		// Relative MEMory
+,AMEM=25		// Absolute MEMory
 };
 
 typedef struct {

@@ -43,6 +43,8 @@ char *elements[]={
 	"MMBR_O1",	// Main MEMory Memory Memory Buffer Register Operator 1
 	"MMBR_O2",	// Main MEMory Memory Memory Buffer Register Operator 2
 	"XPID",		// eXecuting PID
+	"RMEM",	// Relative MEMory
+	"AMEM",	// Absolute MEMory
 	NULL};
 
 ASSERT_DATA asserts[MAX_ASSERTS];
@@ -162,7 +164,7 @@ int Asserts_LoadAsserts() {
 
     // Si vamos a verificar una posición de memoria leemos la dirección (RMEM_OP, RMEM_O1, RMEM_O2, AMEM_OP, AMEM_O1, AMEM_O2)
 	en=elementNumber(a.element);
-	if ((en==RMEM_OP) || (en==RMEM_O1) || (en==RMEM_O2) || (en==AMEM_OP) || (en==AMEM_O1) || (en==AMEM_O2)) {
+	if ((en==RMEM_OP) || (en==RMEM_O1) || (en==RMEM_O2) || (en==AMEM_OP) || (en==AMEM_O1) || (en==AMEM_O2) || (en==RMEM) || (en==AMEM)) {
 		if (address==NULL){
  			// printf("Illegal Assert in line %d of file %s\n",lineNumber,ASSERTS_FILE);
 			ComputerSystem_DebugMessage(87,POWERON,lineNumber,ASSERTS_FILE);
@@ -209,7 +211,7 @@ void genAssertMsg(int time, char *ele, int realValue, int addr) {
 	else
 		printf(", %d", realValue);
 	
-	if ((en==RMEM_OP) || (en==RMEM_O1) || (en==RMEM_O2) || (en==AMEM_OP) || (en==AMEM_O1) || (en==AMEM_O2)) 
+	if ((en==RMEM_OP) || (en==RMEM_O1) || (en==RMEM_O2) || (en==AMEM_OP) || (en==AMEM_O1) || (en==AMEM_O2) || (en==RMEM) || (en==AMEM))
 		printf(", %d", addr);
 	
 	printf("\n");
@@ -234,7 +236,7 @@ void assertMsg(int time, char *ele, int expectedValue, int realValue, int addr) 
 		// printf("Expected: %d; Real: %d", expectedValue, realValue);
 		ComputerSystem_DebugMessage(92,ERROR, expectedValue, realValue);
 	
-	if ((en==RMEM_OP) || (en==RMEM_O1) || (en==RMEM_O2) || (en==AMEM_OP) || (en==AMEM_O1) || (en==AMEM_O2)) 
+	if ((en==RMEM_OP) || (en==RMEM_O1) || (en==RMEM_O2) || (en==AMEM_OP) || (en==AMEM_O1) || (en==AMEM_O2) || (en==RMEM) || (en==AMEM)) 
 		// printf("; Memory address: %d", addr);
 		ComputerSystem_DebugMessage(93,ERROR, addr);
 	
@@ -276,6 +278,7 @@ void Asserts_CheckOneAssert(int na){
 	char operationCode;
 	int operand1;
 	int operand2;
+	int memCell;
 
 	switch (op) {
 		case RMEM_OP: 
@@ -416,6 +419,16 @@ void Asserts_CheckOneAssert(int na){
 				if ((executingProcessID!=asserts[na].value) || GEN_ASSERTS)
 					assertMsg(globalCounter,"XPID",asserts[na].value,executingProcessID,0);			
 				break;
+		case RMEM:
+				memCell=mainMemory[MMU_GetBase()+asserts[na].address].cell;
+				if (memCell !=asserts[na].value || GEN_ASSERTS)
+					assertMsg(globalCounter,"RMEM",asserts[na].value,memCell,asserts[na].address);
+			  	break;
+		case AMEM: 				       
+				memCell=mainMemory[asserts[na].address].cell;
+				if (memCell!=asserts[na].value || GEN_ASSERTS)
+					assertMsg(globalCounter,"AMEM",asserts[na].value,memCell,asserts[na].address);
+			 	break;
 		default: ;
 
 	}

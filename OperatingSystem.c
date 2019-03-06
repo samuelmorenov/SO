@@ -113,15 +113,6 @@ void OperatingSystem_PrepareDaemons(int programListDaemonsBase) {
 // The LTS is responsible of the admission of new processes in the system.
 // Initially, it creates a process from each program specified in the 
 // 			command lineand daemons programs
-/////////////////////////////////////////////////////////////////////////////
-/*
-Modifica la función OperatingSystem_LongTermScheduler(), para que distinga el
-caso de creación de proceso con éxito y el error en caso de que lo hubiese, indicándolo
-mediante la función ComputerSystem_DebugMessage(), utilizando el número de
-mensaje 103, y la constante ERROR como valor para el segundo argumento de la misma
-(sección de interés). El mensaje debe tener el aspecto siguiente:
-*/
-/////////////////////////////////////////////////////////////////////////////
 int OperatingSystem_LongTermScheduler() {
   
 	int PID, i,
@@ -129,17 +120,11 @@ int OperatingSystem_LongTermScheduler() {
 	
 	for (i=0; programList[i]!=NULL && i<PROGRAMSMAXNUMBER ; i++) {
 		PID=OperatingSystem_CreateProcess(i);
-		if(PID == NOFREEENTRY){
-			char *name = programList[i]->executableName;
-			ComputerSystem_DebugMessage(103, INIT, name);
-		}
-		else{
-			numberOfSuccessfullyCreatedProcesses++;
-			if (programList[i]->type==USERPROGRAM) 
-				numberOfNotTerminatedUserProcesses++;
-			// Move process to the ready state
-			OperatingSystem_MoveToTheREADYState(PID);
-		}
+		numberOfSuccessfullyCreatedProcesses++;
+		if (programList[i]->type==USERPROGRAM) 
+			numberOfNotTerminatedUserProcesses++;
+		// Move process to the ready state
+		OperatingSystem_MoveToTheREADYState(PID);
 	}
 
 	// Return the number of succesfully created processes
@@ -148,14 +133,8 @@ int OperatingSystem_LongTermScheduler() {
 
 
 // This function creates a process from an executable program
-/////////////////////////////////////////////////////////////////////////////
-/*
-Modifica la función OperatingSystem_CreateProcess(), para que devuelva a la
-función OperatingSystem_LongTermScheduler() el valor NOFREEENTRY cuando la
-primera función fracasa al intentar conseguir una entrada libre en la tabla de procesos.
-*/
-/////////////////////////////////////////////////////////////////////////////
 int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
+  
 	int PID;
 	int processSize;
 	int loadingPhysicalAddress;
@@ -165,10 +144,6 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 
 	// Obtain a process ID
 	PID=OperatingSystem_ObtainAnEntryInTheProcessTable();
-
-	if(PID >= PROGRAMSMAXNUMBER){
-		return NOFREEENTRY;
-	}
 
 	// Obtain the memory requirements of the program
 	processSize=OperatingSystem_ObtainProgramSize(&programFile, executableProgram->executableName);	
