@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
   
 	// We now have a multiprogrammed computer system
 	// No more than PROGRAMSMAXNUMBER in the command line
-	if ((argc < 3) || (argc>PROGRAMSMAXNUMBER+2)) {
+	if ((argc < 3)){// || (argc>PROGRAMSMAXNUMBER+2)) {
 		printf("USE: Simulator <sections to be debugged> <program1> [<program2> <program3>  ....] \n");
 		exit(-1);
 	}
