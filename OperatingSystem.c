@@ -113,11 +113,11 @@ void OperatingSystem_PrepareDaemons(int programListDaemonsBase) {
 
 /////////////////////////////////////////////////////////////////////////////
 /*
-Modifica la función OperatingSystem_LongTermScheduler(), para que distinga el
-caso de creación de proceso con éxito y el error en caso de que lo hubiese, indicándolo
-mediante la función ComputerSystem_DebugMessage(), utilizando el número de
+Modifica la funciï¿½n OperatingSystem_LongTermScheduler(), para que distinga el
+caso de creaciï¿½n de proceso con ï¿½xito y el error en caso de que lo hubiese, indicï¿½ndolo
+mediante la funciï¿½n ComputerSystem_DebugMessage(), utilizando el nï¿½mero de
 mensaje 103, y la constante ERROR como valor para el segundo argumento de la misma
-(sección de interés). El mensaje debe tener el aspecto siguiente:
+(secciï¿½n de interï¿½s). El mensaje debe tener el aspecto siguiente:
 */
 /////////////////////////////////////////////////////////////////////////////
 // The LTS is responsible of the admission of new processes in the system.
@@ -128,7 +128,7 @@ int OperatingSystem_LongTermScheduler() {
 	int PID, i,
 		numberOfSuccessfullyCreatedProcesses=0;
 	
-	for (i=0; programList[i]!=NULL ; i++) { //quitado && i<PROGRAMSMAXNUMBER
+	for (i=0; programList[i]!=NULL && i<PROGRAMSMAXNUMBER; i++) { //quitado 
 		PID=OperatingSystem_CreateProcess(i);
 		if (PID == NOFREEENTRY) {
 			
@@ -150,9 +150,9 @@ int OperatingSystem_LongTermScheduler() {
 
 /////////////////////////////////////////////////////////////////////////////
 /*
-Modifica la función OperatingSystem_CreateProcess(), para que devuelva a la
-función OperatingSystem_LongTermScheduler() el valor NOFREEENTRY cuando la
-primera función fracasa al intentar conseguir una entrada libre en la tabla de procesos.
+Modifica la funciï¿½n OperatingSystem_CreateProcess(), para que devuelva a la
+funciï¿½n OperatingSystem_LongTermScheduler() el valor NOFREEENTRY cuando la
+primera funciï¿½n fracasa al intentar conseguir una entrada libre en la tabla de procesos.
 */
 /////////////////////////////////////////////////////////////////////////////
 // This function creates a process from an executable program
