@@ -28,6 +28,7 @@ int OperatingSystem_ExtractFromReadyToRun();
 void OperatingSystem_HandleException();
 void OperatingSystem_HandleSystemCall();
 void OperatingSystem_PrintReadyToRunQueue();
+void Cambio_Estado(int ID, int anterior);
 
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
@@ -239,8 +240,7 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 	if (Heap_add(PID, readyToRunQueue,QUEUE_PRIORITY ,&numberOfReadyToRunProcesses ,PROCESSTABLEMAXSIZE)>=0) {
 		int anterior = processTable[PID].state;
 		processTable[PID].state=READY;
-		ComputerSystem_DebugMessage(110, SYSPROC, programList[processTable[PID].programListIndex]->executableName, statesNames[anterior], statesNames[processTable[PID].state]);
-		
+		Cambio_Estado(PID, anterior);
 	} 
 	OperatingSystem_PrintReadyToRunQueue();
 }
@@ -279,8 +279,7 @@ void OperatingSystem_Dispatch(int PID) {
 	// Change the process' state
 	int anterior = processTable[PID].state;
 	processTable[PID].state=EXECUTING;
-	ComputerSystem_DebugMessage(110, SYSPROC, programList[processTable[PID].programListIndex]->executableName, statesNames[anterior], statesNames[processTable[PID].state]);
-		
+	Cambio_Estado(PID, anterior);
 	// Modify hardware registers with appropriate values for the process identified by PID
 	OperatingSystem_RestoreContext(PID);
 }
@@ -339,8 +338,7 @@ void OperatingSystem_TerminateProcess() {
 	int selectedProcess;
   	int anterior = processTable[executingProcessID].state;
 	processTable[executingProcessID].state=EXIT;
-	ComputerSystem_DebugMessage(110, SYSPROC, programList[processTable[executingProcessID].programListIndex]->executableName, statesNames[anterior], statesNames[processTable[executingProcessID].state]);
-	
+	Cambio_Estado(executingProcessID, anterior);
 	
 	if (programList[processTable[executingProcessID].programListIndex]->type==USERPROGRAM) 
 		// One more user process that has terminated
@@ -414,5 +412,14 @@ void OperatingSystem_PrintReadyToRunQueue(){
 		
 	}
 	ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
+	
+}
+
+void Cambio_Estado(int ID, int anterior){
+	ComputerSystem_DebugMessage(110, SYSPROC, 
+	ID,
+	programList[processTable[executingProcessID].programListIndex]->executableName,
+	statesNames[anterior],
+	statesNames[processTable[executingProcessID].state]);
 	
 }
