@@ -198,6 +198,16 @@ void Processor_DecodeAndExecuteInstruction() {
 			registerPSW_CPU=Processor_CopyFromSystemStack(MAINMEMORYSIZE-2);
 			break;		
 
+
+		/* Instruccion MEMADD
+		MEMADD operand1 memAddress
+		La ejecución de la instrucción realizará la suma del valor del operand1 y el contenido de la celda
+		de memoria indicada por memAddress(registerMAR_CPU) y dejará el resultado en el registro acumulador (registerAccumulator_CPU).
+		*/
+		case 'm':
+			registerAccumulator_CPU = operand1 + registerMAR_CPU;
+			break;
+
 		// Unknown instruction
 		default : 
 			registerPC_CPU++;
