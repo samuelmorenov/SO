@@ -148,6 +148,9 @@ int OperatingSystem_LongTermScheduler() {
 		case PROGRAMNOTVALID:
 			ComputerSystem_DebugMessage(104, INIT, name, "--- invalid priority or size ---");
 			break;
+		case TOOBIGPROCESS:
+			ComputerSystem_DebugMessage(105, INIT, name);
+			break;
 
 		default:
 			numberOfSuccessfullyCreatedProcesses++;
@@ -182,33 +185,24 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 
 	// Obtain a process ID
 	PID=OperatingSystem_ObtainAnEntryInTheProcessTable();
-
-	if (PID == NOFREEENTRY) {
-		return NOFREEENTRY;
-	}
+	if (PID == NOFREEENTRY)
+		return PID;
 	// Obtain the memory requirements of the program
 	processSize=OperatingSystem_ObtainProgramSize(&programFile, executableProgram->executableName);	
-
-	if (processSize == PROGRAMDOESNOTEXIST) {
-		return PROGRAMDOESNOTEXIST;
-	}
-	if (processSize == PROGRAMNOTVALID) {
-		return PROGRAMNOTVALID;
-	}
-
-
+	if (processSize == PROGRAMDOESNOTEXIST || processSize == PROGRAMNOTVALID)
+		return processSize;
 	// Obtain the priority for the process
 	priority=OperatingSystem_ObtainPriority(programFile);
-	
+	if (priority == PROGRAMNOTVALID) 
+		return priority;
 	// Obtain enough memory space
  	loadingPhysicalAddress=OperatingSystem_ObtainMainMemory(processSize, PID);
-
+	if (loadingPhysicalAddress == TOOBIGPROCESS)
+		return loadingPhysicalAddress;
 	// Load program in the allocated memory
-	OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress, processSize);
-	
+	OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress, processSize);// == TOOBIGPROCESS) return TOOBIGPROCESS;
 	// PCB initialization
 	OperatingSystem_PCBInitialization(PID, loadingPhysicalAddress, processSize, priority, indexOfExecutableProgram);
-	
 	// Show message "Process [PID] created from program [executableName]\n"
 	ComputerSystem_DebugMessage(22,INIT,PID,executableProgram->executableName);
 	
