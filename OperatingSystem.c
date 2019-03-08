@@ -135,41 +135,28 @@ int OperatingSystem_LongTermScheduler() {
 	
 	for (i=0; programList[i]!=NULL && i<PROGRAMSMAXNUMBER; i++) {
 		PID=OperatingSystem_CreateProcess(i);
-		//char *name = programList[i]->executableName;
-
-
-		PID = OperatingSystem_CreateProcess(i);
-		if (PID == NOFREEENTRY) {
-
-			char *name = programList[i]->executableName;
+		char *name = programList[i]->executableName;
+		switch (PID) {
+		case NOFREEENTRY:
 			ComputerSystem_DebugMessage(103, INIT, name);
-		}
-		else {
+			break;
+
+		case PROGRAMDOESNOTEXIST:
+			ComputerSystem_DebugMessage(104, INIT, name, "--- it does not exist ---");
+			break;
+
+		case PROGRAMNOTVALID:
+			ComputerSystem_DebugMessage(104, INIT, name, "--- invalid priority or size ---");
+			break;
+
+		default:
 			numberOfSuccessfullyCreatedProcesses++;
 			if (programList[i]->type == USERPROGRAM)
 				numberOfNotTerminatedUserProcesses++;
 			// Move process to the ready state
 			OperatingSystem_MoveToTheREADYState(PID);
+			break;
 		}
-
-
-		//switch (PID) {
-		//case NOFREEENTRY:
-		//	ComputerSystem_DebugMessage(103, INIT, name);
-		//	break;
-
-		////case PROGRAMDOESNOTEXIST:
-		////	ComputerSystem_DebugMessage(104, INIT, name, "PROGRAMDOESNOTEXIST");
-		////	break;
-
-		//default:
-		//	numberOfSuccessfullyCreatedProcesses++;
-		//	if (programList[i]->type == USERPROGRAM)
-		//		numberOfNotTerminatedUserProcesses++;
-		//	// Move process to the ready state
-		//	OperatingSystem_MoveToTheREADYState(PID);
-		//	break;
-		//}
 	}
 
 	// Return the number of succesfully created processes
@@ -201,9 +188,14 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	}
 	// Obtain the memory requirements of the program
 	processSize=OperatingSystem_ObtainProgramSize(&programFile, executableProgram->executableName);	
+
 	if (processSize == PROGRAMDOESNOTEXIST) {
 		return PROGRAMDOESNOTEXIST;
 	}
+	if (processSize == PROGRAMNOTVALID) {
+		return PROGRAMNOTVALID;
+	}
+
 
 	// Obtain the priority for the process
 	priority=OperatingSystem_ObtainPriority(programFile);
