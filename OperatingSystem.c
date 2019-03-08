@@ -133,10 +133,14 @@ int OperatingSystem_LongTermScheduler() {
 	int PID, i,
 		numberOfSuccessfullyCreatedProcesses=0;
 	
-	for (i=0; programList[i]!=NULL && i<PROGRAMSMAXNUMBER; i++) { //quitado 
+	for (i=0; programList[i]!=NULL && i<PROGRAMSMAXNUMBER; i++) {
 		PID=OperatingSystem_CreateProcess(i);
+		//char *name = programList[i]->executableName;
+
+
+		PID = OperatingSystem_CreateProcess(i);
 		if (PID == NOFREEENTRY) {
-			
+
 			char *name = programList[i]->executableName;
 			ComputerSystem_DebugMessage(103, INIT, name);
 		}
@@ -147,6 +151,25 @@ int OperatingSystem_LongTermScheduler() {
 			// Move process to the ready state
 			OperatingSystem_MoveToTheREADYState(PID);
 		}
+
+
+		//switch (PID) {
+		//case NOFREEENTRY:
+		//	ComputerSystem_DebugMessage(103, INIT, name);
+		//	break;
+
+		////case PROGRAMDOESNOTEXIST:
+		////	ComputerSystem_DebugMessage(104, INIT, name, "PROGRAMDOESNOTEXIST");
+		////	break;
+
+		//default:
+		//	numberOfSuccessfullyCreatedProcesses++;
+		//	if (programList[i]->type == USERPROGRAM)
+		//		numberOfNotTerminatedUserProcesses++;
+		//	// Move process to the ready state
+		//	OperatingSystem_MoveToTheREADYState(PID);
+		//	break;
+		//}
 	}
 
 	// Return the number of succesfully created processes
@@ -178,6 +201,9 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	}
 	// Obtain the memory requirements of the program
 	processSize=OperatingSystem_ObtainProgramSize(&programFile, executableProgram->executableName);	
+	if (processSize == PROGRAMDOESNOTEXIST) {
+		return PROGRAMDOESNOTEXIST;
+	}
 
 	// Obtain the priority for the process
 	priority=OperatingSystem_ObtainPriority(programFile);
