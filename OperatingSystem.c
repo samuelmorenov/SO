@@ -200,7 +200,7 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	if (loadingPhysicalAddress == TOOBIGPROCESS)
 		return loadingPhysicalAddress;
 	// Load program in the allocated memory
-	OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress, processSize);// == TOOBIGPROCESS) return TOOBIGPROCESS;
+	if(OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress, processSize) == TOOBIGPROCESS) return TOOBIGPROCESS;
 	// PCB initialization
 	OperatingSystem_PCBInitialization(PID, loadingPhysicalAddress, processSize, priority, indexOfExecutableProgram);
 	// Show message "Process [PID] created from program [executableName]\n"
