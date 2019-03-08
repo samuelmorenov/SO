@@ -28,7 +28,7 @@ int OperatingSystem_ExtractFromReadyToRun();
 void OperatingSystem_HandleException();
 void OperatingSystem_HandleSystemCall();
 void OperatingSystem_PrintReadyToRunQueue();
-void Cambio_Estado(int ID, int anterior);
+void Cambio_Estado(int ID, int anterior, char const *posterior);
 
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
@@ -240,7 +240,7 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 	if (Heap_add(PID, readyToRunQueue,QUEUE_PRIORITY ,&numberOfReadyToRunProcesses ,PROCESSTABLEMAXSIZE)>=0) {
 		int anterior = processTable[PID].state;
 		processTable[PID].state=READY;
-		Cambio_Estado(PID, anterior);
+		Cambio_Estado(PID, anterior, "READY");
 	} 
 	OperatingSystem_PrintReadyToRunQueue();
 }
@@ -279,7 +279,7 @@ void OperatingSystem_Dispatch(int PID) {
 	// Change the process' state
 	int anterior = processTable[PID].state;
 	processTable[PID].state=EXECUTING;
-	Cambio_Estado(PID, anterior);
+	Cambio_Estado(PID, anterior, "EXECUTING");
 	// Modify hardware registers with appropriate values for the process identified by PID
 	OperatingSystem_RestoreContext(PID);
 }
@@ -338,7 +338,7 @@ void OperatingSystem_TerminateProcess() {
 	int selectedProcess;
   	int anterior = processTable[executingProcessID].state;
 	processTable[executingProcessID].state=EXIT;
-	Cambio_Estado(executingProcessID, anterior);
+	Cambio_Estado(executingProcessID, anterior, "EXIT");
 	
 	if (programList[processTable[executingProcessID].programListIndex]->type==USERPROGRAM) 
 		// One more user process that has terminated
@@ -415,11 +415,11 @@ void OperatingSystem_PrintReadyToRunQueue(){
 	
 }
 
-void Cambio_Estado(int ID, int anterior){
+void Cambio_Estado(int ID, int anterior, char const *posterior){
 	ComputerSystem_DebugMessage(110, SYSPROC, 
 	ID,
 	programList[processTable[executingProcessID].programListIndex]->executableName,
 	statesNames[anterior],
-	statesNames[processTable[executingProcessID].state]);
+	posterior);
 	
 }
