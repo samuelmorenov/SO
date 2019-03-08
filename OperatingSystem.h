@@ -13,7 +13,7 @@
 
 #define PROCESSTABLEMAXSIZE 4
 
-#define INITIALPID 0
+#define INITIALPID 3
 
 // In this version, every process occupies a 60 positions main memory chunk 
 // so we can use 60 positions for OS code and the system stack
