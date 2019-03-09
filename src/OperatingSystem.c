@@ -46,10 +46,13 @@ int sipID;
 int baseDaemonsInProgramList; 
 
 // Array that contains the identifiers of the READY processes
-//Ejercicio 11 TODO Enunciado
+//Ejercicio 11 TODO - Enunciado
+//int readyToRunQueue[PROCESSTABLEMAXSIZE];
 int readyToRunQueue[NUMBEROFQUEUES][PROCESSTABLEMAXSIZE];
+//int numberOfReadyToRunProcesses=0;
 int numberOfReadyToRunProcesses[NUMBEROFQUEUES] = { 0,0 };
 char * queueNames[NUMBEROFQUEUES] = { "USER","DAEMONS" };
+
 
 // Variable containing the number of not terminated user processes
 int numberOfNotTerminatedUserProcesses=0;
@@ -57,7 +60,7 @@ int numberOfNotTerminatedUserProcesses=0;
 //Ejercicio 10
 char * statesNames [5]={"NEW","READY","EXECUTING","BLOCKED","EXIT"};
 
-//Ejercicio 11 TODO 0
+//Ejercicio 11 TODO - 0
 // Array that contains basic data abaut all deamons
 // and all user programs specified in the command line
 PROGRAMS_DATA *programList[PROGRAMSMAXNUMBER];
@@ -231,13 +234,14 @@ int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 
 
 // Assign initial values to all fields inside the PCB
-//Ejercicio 11 TODO 1
+//Ejercicio 11 TODO 1 Sin hacer nada
 void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int processSize, int priority, int processPLIndex) {
 
 	processTable[PID].busy=1;
 	processTable[PID].initialPhysicalAddress=initialPhysicalAddress;
 	processTable[PID].processSize=processSize;
 	processTable[PID].state=NEW;
+	//New process [SystemIdleProcess] moving to the [NEW] state
 	ComputerSystem_DebugMessage(111, SYSPROC, programList[processTable[PID].programListIndex]->executableName);
 	
 	processTable[PID].priority=priority;
@@ -258,8 +262,8 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 // Move a process to the READY state: it will be inserted, depending on its priority, in
 // a queue of identifiers of READY processes
 void OperatingSystem_MoveToTheREADYState(int PID) {
-	//Ejercicio 11 TODO 2
-	if (Heap_add(PID, readyToRunQueue[processTable[PID].queueID],QUEUE_PRIORITY,&numberOfReadyToRunProcesses[processTable[PID].queueID],PROCESSTABLEMAXSIZE)>=0) { //Ejercicio 11
+	//Ejercicio 11 TODO - 2
+	if (Heap_add(PID, readyToRunQueue[processTable[PID].queueID],QUEUE_PRIORITY,&numberOfReadyToRunProcesses[processTable[PID].queueID],PROCESSTABLEMAXSIZE)>=0) {
 		int anterior = processTable[PID].state;
 		processTable[PID].state=READY;
 		Cambio_Estado(PID, anterior, "READY");
@@ -279,11 +283,10 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 //	
 //	return selectedProcess;
 //}
-//Ejercicio 11 TODO 3
+//Ejercicio 11 TODO - 3 Aqui añadio un for
 int OperatingSystem_ShortTermScheduler() {
 	int selectedProcess = NOPROCESS;
 	int i;
-
 	for (i = 0; i < NUMBEROFQUEUES && selectedProcess == NOPROCESS; i++)
 		selectedProcess = OperatingSystem_ExtractFromReadyToRun(i);
 
@@ -292,12 +295,11 @@ int OperatingSystem_ShortTermScheduler() {
 
 
 // Return PID of more priority process in the READY queue
-// Ejercicio 11 TODO 4
-int OperatingSystem_ExtractFromReadyToRun(int queueID) {
+// Ejercicio 11 TODO - 4 warning: passing argument 3 of ‘Heap_poll’ from incompatible pointer type
+int OperatingSystem_ExtractFromReadyToRun(int i) {
   
 	int selectedProcess=NOPROCESS;
-
-	selectedProcess=Heap_poll(readyToRunQueue[queueID],QUEUE_PRIORITY ,&numberOfReadyToRunProcesses);
+	selectedProcess=Heap_poll(readyToRunQueue[i],QUEUE_PRIORITY ,&numberOfReadyToRunProcesses);
 	
 	// Return most priority process or NOPROCESS if empty queue
 	return selectedProcess; 
@@ -452,23 +454,26 @@ void OperatingSystem_PrintReadyToRunQueue(){
  void OperatingSystem_PrintReadyToRunQueue() {
 	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
 
-	//int a[17];
-	//size_t n = sizeof(readyToRunQueue)/sizeof(readyToRunQueue[0]);
-
 	int i = 0;
-	for (i = 0; i < numberOfReadyToRunProcesses; i++) {
-		int identificador = readyToRunQueue[i];
-		int prioridad = processTable[identificador].priority;
+	int j = 0;
+	//TODO warning: comparison between pointer and integer
+	for (j = 0; j < NUMBEROFQUEUES; j++) {
+		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
+			printf("NUMBEROFQUEUES = %d, numberOfReadyToRunProcesses = %d <------\n", j, i);
+			//TODO warning: initialization makes integer from pointer without a cast
+			int identificador = readyToRunQueue[j][i];
+			printf("readyToRunQueue[][] = %d", identificador);
+			int prioridad = processTable[identificador].priority;
 
-		if (i == 0) {
-			ComputerSystem_DebugMessage(107, SHORTTERMSCHEDULE, identificador, prioridad);
+			if (i == 0) {
+				ComputerSystem_DebugMessage(112, queueNames[j], SHORTTERMSCHEDULE, identificador, prioridad);
+			} else {
+				ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE, identificador, prioridad);
+			}
 		}
-		else {
-			ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE, identificador, prioridad);
-		}
-
+		ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
 	}
-	ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
+
 
 }
 
