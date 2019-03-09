@@ -33,7 +33,7 @@ enum ProcessStates { NEW, READY, EXECUTING, BLOCKED, EXIT};
 // Enumerated type containing the list of system calls and their numeric identifiers
 enum SystemCallIdentifiers { SYSCALL_END=3, SYSCALL_PRINTEXECPID=5};
 
-//Ejercicio 11
+//Ejercicio 11 - 0/Enunciado
 #define NUMBEROFQUEUES 2
 enum ReadyToRunProcessQueues { USERPROCESSQUEUE, DAEMONSQUEUE };
 
@@ -47,7 +47,7 @@ typedef struct {
 	int copyOfPCRegister;
 	unsigned int copyOfPSWRegister;
 	int programListIndex;
-	int queueID; //Ejercicio 11
+	int queueID; //Ejercicio 11 - Enunciado
 
 } PCB;
 

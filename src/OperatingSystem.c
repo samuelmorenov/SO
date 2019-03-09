@@ -46,7 +46,7 @@ int sipID;
 int baseDaemonsInProgramList; 
 
 // Array that contains the identifiers of the READY processes
-//Ejercicio 11:
+//Ejercicio 11 TODO Enunciado
 int readyToRunQueue[NUMBEROFQUEUES][PROCESSTABLEMAXSIZE];
 int numberOfReadyToRunProcesses[NUMBEROFQUEUES] = { 0,0 };
 char * queueNames[NUMBEROFQUEUES] = { "USER","DAEMONS" };
@@ -57,7 +57,7 @@ int numberOfNotTerminatedUserProcesses=0;
 //Ejercicio 10
 char * statesNames [5]={"NEW","READY","EXECUTING","BLOCKED","EXIT"};
 
-//Ejericico 11:
+//Ejercicio 11 TODO 0
 // Array that contains basic data abaut all deamons
 // and all user programs specified in the command line
 PROGRAMS_DATA *programList[PROGRAMSMAXNUMBER];
@@ -127,11 +127,11 @@ void OperatingSystem_PrepareDaemons(int programListDaemonsBase) {
 
 /////////////////////////////////////////////////////////////////////////////
 /*
-Modifica la funci�n OperatingSystem_LongTermScheduler(), para que distinga el
-caso de creaci�n de proceso con �xito y el error en caso de que lo hubiese, indic�ndolo
-mediante la funci�n ComputerSystem_DebugMessage(), utilizando el n�mero de
+Modifica la funcion OperatingSystem_LongTermScheduler(), para que distinga el
+caso de creacion de proceso con oxito y el error en caso de que lo hubiese, indicondolo
+mediante la funcion ComputerSystem_DebugMessage(), utilizando el nomero de
 mensaje 103, y la constante ERROR como valor para el segundo argumento de la misma
-(secci�n de inter�s). El mensaje debe tener el aspecto siguiente:
+(seccion de interos). El mensaje debe tener el aspecto siguiente:
 */
 /////////////////////////////////////////////////////////////////////////////
 // The LTS is responsible of the admission of new processes in the system.
@@ -177,9 +177,9 @@ int OperatingSystem_LongTermScheduler() {
 
 /////////////////////////////////////////////////////////////////////////////
 /*
-Modifica la funci�n OperatingSystem_CreateProcess(), para que devuelva a la
-funci�n OperatingSystem_LongTermScheduler() el valor NOFREEENTRY cuando la
-primera funci�n fracasa al intentar conseguir una entrada libre en la tabla de procesos.
+Modifica la funcion OperatingSystem_CreateProcess(), para que devuelva a la
+funcion OperatingSystem_LongTermScheduler() el valor NOFREEENTRY cuando la
+primera funcion fracasa al intentar conseguir una entrada libre en la tabla de procesos.
 */
 /////////////////////////////////////////////////////////////////////////////
 // This function creates a process from an executable program
@@ -231,6 +231,7 @@ int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 
 
 // Assign initial values to all fields inside the PCB
+//Ejercicio 11 TODO 1
 void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int processSize, int priority, int processPLIndex) {
 
 	processTable[PID].busy=1;
@@ -257,6 +258,7 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 // Move a process to the READY state: it will be inserted, depending on its priority, in
 // a queue of identifiers of READY processes
 void OperatingSystem_MoveToTheREADYState(int PID) {
+	//Ejercicio 11 TODO 2
 	if (Heap_add(PID, readyToRunQueue[processTable[PID].queueID],QUEUE_PRIORITY,&numberOfReadyToRunProcesses[processTable[PID].queueID],PROCESSTABLEMAXSIZE)>=0) { //Ejercicio 11
 		int anterior = processTable[PID].state;
 		processTable[PID].state=READY;
@@ -277,7 +279,7 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 //	
 //	return selectedProcess;
 //}
-//Ejercicio 11:
+//Ejercicio 11 TODO 3
 int OperatingSystem_ShortTermScheduler() {
 	int selectedProcess = NOPROCESS;
 	int i;
@@ -285,16 +287,17 @@ int OperatingSystem_ShortTermScheduler() {
 	for (i = 0; i < NUMBEROFQUEUES && selectedProcess == NOPROCESS; i++)
 		selectedProcess = OperatingSystem_ExtractFromReadyToRun(i);
 
-	return selecedProcess;
+	return selectedProcess;
 }
 
 
 // Return PID of more priority process in the READY queue
-int OperatingSystem_ExtractFromReadyToRun() {
+// Ejercicio 11 TODO 4
+int OperatingSystem_ExtractFromReadyToRun(int queueID) {
   
 	int selectedProcess=NOPROCESS;
 
-	selectedProcess=Heap_poll(readyToRunQueue,QUEUE_PRIORITY ,&numberOfReadyToRunProcesses);
+	selectedProcess=Heap_poll(readyToRunQueue[queueID],QUEUE_PRIORITY ,&numberOfReadyToRunProcesses);
 	
 	// Return most priority process or NOPROCESS if empty queue
 	return selectedProcess; 
@@ -444,10 +447,9 @@ void OperatingSystem_PrintReadyToRunQueue(){
 	ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
 	
 }
-/*
-Ejercicio 11
 */
-void OperatingSystem_PrintReadyToRunQueue() {
+//Ejercicio 11 TODO 5
+ void OperatingSystem_PrintReadyToRunQueue() {
 	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
 
 	//int a[17];
