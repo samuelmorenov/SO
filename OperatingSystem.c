@@ -60,7 +60,7 @@ char * statesNames [5]={"NEW","READY","EXECUTING","BLOCKED","EXIT"};
 //Ejericico 11:
 // Array that contains basic data abaut all deamons
 // and all user programs specified in the command line
-PROGRAMS_DATA *programList[PROGRAMMAXNUMBER];
+PROGRAMS_DATA *programList[PROGRAMSMAXNUMBER];
 
 int executingProgressID = NOPROCESS;
 
@@ -279,7 +279,7 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 //}
 //Ejercicio 11:
 int OperatingSystem_ShortTermScheduler() {
-	int selecedProcess = NOPROCESS;
+	int selectedProcess = NOPROCESS;
 	int i;
 
 	for (i = 0; i < NUMBEROFQUEUES && selectedProcess == NOPROCESS; i++)
