@@ -24,6 +24,11 @@
 
 #define NOPROCESS -1
 
+//Ejercicio 11
+#define NUMBEROFQUEUES 2
+
+enum ReadyToRunProcessQueues { USERPROCESSQUEUE, DAEMONSQUEUE };
+
 // Contains the possible type of programs
 enum ProgramTypes { USERPROGRAM, DAEMONPROGRAM }; 
 
@@ -47,7 +52,8 @@ typedef struct {
 	int copyOfPCRegister;
 	unsigned int copyOfPSWRegister;
 	int programListIndex;
-	int queueID;
+	int queueID; //Ejercicio 11
+
 } PCB;
 
 // These "extern" declaration enables other source code files to gain access
