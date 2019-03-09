@@ -33,6 +33,10 @@ enum ProcessStates { NEW, READY, EXECUTING, BLOCKED, EXIT};
 // Enumerated type containing the list of system calls and their numeric identifiers
 enum SystemCallIdentifiers { SYSCALL_END=3, SYSCALL_PRINTEXECPID=5};
 
+//Ejercicio 11
+#define NUMBEROFQUEUES 2
+enum ReadyToRunProcessQueues { USERPROCESSQUEUE, DAEMONSQUEUE };
+
 // A PCB contains all of the information about a process that is needed by the OS
 typedef struct {
 	int busy;
@@ -43,6 +47,7 @@ typedef struct {
 	int copyOfPCRegister;
 	unsigned int copyOfPSWRegister;
 	int programListIndex;
+	int queueID;
 } PCB;
 
 // These "extern" declaration enables other source code files to gain access

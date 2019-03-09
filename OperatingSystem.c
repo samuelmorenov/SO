@@ -46,14 +46,23 @@ int sipID;
 int baseDaemonsInProgramList; 
 
 // Array that contains the identifiers of the READY processes
-int readyToRunQueue[PROCESSTABLEMAXSIZE];
-int numberOfReadyToRunProcesses=0;
+//Ejercicio 11:
+int readyToRunQueue[NUMBEROFQUEUES][PROCESSTABLEMAXSIZE];
+int numberOfReadyToRunProcesses[NUMBEROFQUEUES] = { 0,0 };
+char * queueNames[NUMBEROFQUEUES] = { "USER","DAEMONS" };
 
 // Variable containing the number of not terminated user processes
 int numberOfNotTerminatedUserProcesses=0;
 
 //Ejercicio 10
 char * statesNames [5]={"NEW","READY","EXECUTING","BLOCKED","EXIT"};
+
+//Ejericico 11:
+// Array that contains basic data abaut all deamons
+// and all user programs specified in the command line
+PROGRAMS_DATA *programList[PROGRAMMAXNUMBER];
+
+int executingProgressID = NOPROCESS;
 
 // Initial set of tasks of the OS
 void OperatingSystem_Initialize(int daemonsIndex) {
@@ -248,8 +257,7 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 // Move a process to the READY state: it will be inserted, depending on its priority, in
 // a queue of identifiers of READY processes
 void OperatingSystem_MoveToTheREADYState(int PID) {
-	
-	if (Heap_add(PID, readyToRunQueue,QUEUE_PRIORITY ,&numberOfReadyToRunProcesses ,PROCESSTABLEMAXSIZE)>=0) {
+	if (Heap_add(PID, readyToRunQueue[processTable[PID].queueID],QUEUE_PRIORITY,&numberOfReadyToRunProcesses[processTable[PID].queueID],PROCESSTABLEMAXSIZE)>=0) { //Ejercicio 11
 		int anterior = processTable[PID].state;
 		processTable[PID].state=READY;
 		Cambio_Estado(PID, anterior, "READY");
@@ -261,13 +269,23 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 // The STS is responsible of deciding which process to execute when specific events occur.
 // It uses processes priorities to make the decission. Given that the READY queue is ordered
 // depending on processes priority, the STS just selects the process in front of the READY queue
+//int OperatingSystem_ShortTermScheduler() {
+//	
+//	int selectedProcess;
+//
+//	selectedProcess=OperatingSystem_ExtractFromReadyToRun();
+//	
+//	return selectedProcess;
+//}
+//Ejercicio 11:
 int OperatingSystem_ShortTermScheduler() {
-	
-	int selectedProcess;
+	int selecedProcess = NOPROCESS;
+	int i;
 
-	selectedProcess=OperatingSystem_ExtractFromReadyToRun();
-	
-	return selectedProcess;
+	for (i = 0; i < NUMBEROFQUEUES && selectedProcess == NOPROCESS; i++)
+		selectedProcess = OperatingSystem_ExtractFromReadyToRun(i);
+
+	return selecedProcess;
 }
 
 
@@ -403,7 +421,7 @@ void OperatingSystem_InterruptLogic(int entryPoint){
 
 /*
 Ejerccio 9
-*/
+* /
 void OperatingSystem_PrintReadyToRunQueue(){
 	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
 
@@ -425,6 +443,31 @@ void OperatingSystem_PrintReadyToRunQueue(){
 	}
 	ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
 	
+}
+/*
+Ejercicio 11
+*/
+void OperatingSystem_PrintReadyToRunQueue() {
+	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
+
+	//int a[17];
+	//size_t n = sizeof(readyToRunQueue)/sizeof(readyToRunQueue[0]);
+
+	int i = 0;
+	for (i = 0; i < numberOfReadyToRunProcesses; i++) {
+		int identificador = readyToRunQueue[i];
+		int prioridad = processTable[identificador].priority;
+
+		if (i == 0) {
+			ComputerSystem_DebugMessage(107, SHORTTERMSCHEDULE, identificador, prioridad);
+		}
+		else {
+			ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE, identificador, prioridad);
+		}
+
+	}
+	ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
+
 }
 
 void Cambio_Estado(int ID, int anterior, char const *posterior){
