@@ -46,15 +46,9 @@ int sipID;
 int baseDaemonsInProgramList; 
 
 // Array that contains the identifiers of the READY processes
-<<<<<<< HEAD
 //Ejercicio 11:
 int readyToRunQueue[NUMBEROFQUEUES][PROCESSTABLEMAXSIZE];
 int numberOfReadyToRunProcesses[NUMBEROFQUEUES] = { 0,0 };
-=======
-//Ejercicio 11
-int readyToRunQueue[NUMBEROFQUEUES][PROCESSTABLEMAXSIZE];
-int numberOfReadyToRunProcesses[NUMBEROFQUEUES] = { 0,0 };
->>>>>>> 54b68444459cdfa5f212c14e721e9c5c632871b3
 char * queueNames[NUMBEROFQUEUES] = { "USER","DAEMONS" };
 
 // Variable containing the number of not terminated user processes
