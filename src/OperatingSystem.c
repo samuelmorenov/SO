@@ -241,9 +241,6 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 	processTable[PID].initialPhysicalAddress=initialPhysicalAddress;
 	processTable[PID].processSize=processSize;
 	processTable[PID].state=NEW;
-	//New process [SystemIdleProcess] moving to the [NEW] state
-	ComputerSystem_DebugMessage(111, SYSPROC, programList[processTable[PID].programListIndex]->executableName);
-	
 	processTable[PID].priority=priority;
 	processTable[PID].programListIndex=processPLIndex;
 	// Daemons run in protected mode and MMU use real address
@@ -255,6 +252,9 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 		processTable[PID].copyOfPCRegister=0;
 		processTable[PID].copyOfPSWRegister=0;
 	}
+	//New process [SystemIdleProcess] moving to the [NEW] state
+	ComputerSystem_DebugMessage(111, SYSPROC, programList[processTable[PID].programListIndex]->executableName);
+
 
 }
 
@@ -263,7 +263,7 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 // a queue of identifiers of READY processes
 void OperatingSystem_MoveToTheREADYState(int PID) {
 	//Ejercicio 11 TODO - 2
-	if (Heap_add(PID, readyToRunQueue[processTable[PID].queueID],QUEUE_PRIORITY,&numberOfReadyToRunProcesses[processTable[PID].queueID],PROCESSTABLEMAXSIZE)>=0) {
+	if (Heap_add(PID, &readyToRunQueue[processTable[PID].queueID],QUEUE_PRIORITY,&numberOfReadyToRunProcesses[processTable[PID].queueID],PROCESSTABLEMAXSIZE)>=0) {
 		int anterior = processTable[PID].state;
 		processTable[PID].state=READY;
 		Cambio_Estado(PID, anterior, "READY");
@@ -314,7 +314,7 @@ void OperatingSystem_Dispatch(int PID) {
 	// Change the process' state
 	int anterior = processTable[PID].state;
 	processTable[PID].state=EXECUTING;
-	Cambio_Estado(PID, anterior, "EXECUTING");
+	Cambio_Estado(executingProcessID, anterior, "EXECUTING");
 	// Modify hardware registers with appropriate values for the process identified by PID
 	OperatingSystem_RestoreContext(PID);
 }
@@ -457,16 +457,12 @@ void OperatingSystem_PrintReadyToRunQueue(){
 	int i = 0;
 	int j = 0;
 	//TODO warning: comparison between pointer and integer
-	for (j = 0; j < NUMBEROFQUEUES; j++) {
+	for (j = 0; j < 2; j++) {
 		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
-			printf("NUMBEROFQUEUES = %d, numberOfReadyToRunProcesses = %d <------\n", j, i);
-			//TODO warning: initialization makes integer from pointer without a cast
 			int identificador = readyToRunQueue[j][i];
-			printf("readyToRunQueue[][] = %d", identificador);
 			int prioridad = processTable[identificador].priority;
-
 			if (i == 0) {
-				ComputerSystem_DebugMessage(112, queueNames[j], SHORTTERMSCHEDULE, identificador, prioridad);
+				ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[j], identificador, prioridad);
 			} else {
 				ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE, identificador, prioridad);
 			}
@@ -480,8 +476,23 @@ void OperatingSystem_PrintReadyToRunQueue(){
 void Cambio_Estado(int ID, int anterior, char const *posterior){
 	ComputerSystem_DebugMessage(110, SYSPROC, 
 	ID,
-	programList[processTable[executingProcessID].programListIndex]->executableName,
+	programList[processTable[ID].programListIndex]->executableName,
 	statesNames[anterior],
 	posterior);
 	
 }
+//void Imprimir_String(char const *cadena) {
+//	#define ANSI_COLOR_BLUE    "\x1b[34m"
+//	#define ANSI_COLOR_RESET   "\x1b[0m"
+//	printf(ANSI_COLOR_BLUE "\t");
+//	printf("%s", cadena);
+//	printf(ANSI_COLOR_RESET "\n");
+//}
+//void Imprimir_Int(int entero) {
+//	#define ANSI_COLOR_BLUE    "\x1b[34m"
+//	#define ANSI_COLOR_RESET   "\x1b[0m"
+//	printf(ANSI_COLOR_BLUE "\t");
+//	printf("%d", entero);
+//	printf(ANSI_COLOR_RESET "\n");
+//}
+
