@@ -258,7 +258,6 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 	}
 	//New process [SystemIdleProcess] moving to the [NEW] state
 	ComputerSystem_DebugMessage(111, SYSPROC, programList[processTable[PID].programListIndex]->executableName);
-	printf("processTable[PID].queueID = %d\n", processTable[PID].queueID);
 }
 
 
@@ -299,10 +298,11 @@ int OperatingSystem_ShortTermScheduler() {
 
 // Return PID of more priority process in the READY queue
 // Ejercicio 11 TODO - 4 warning: passing argument 3 of ‘Heap_poll’ from incompatible pointer type
-int OperatingSystem_ExtractFromReadyToRun(int i) {
-  
+int OperatingSystem_ExtractFromReadyToRun(int queueID){
+
 	int selectedProcess=NOPROCESS;
-	selectedProcess=Heap_poll(readyToRunQueue[i],QUEUE_PRIORITY ,&numberOfReadyToRunProcesses);
+	//selectedProcess=Heap_poll(readyToRunQueue,QUEUE_PRIORITY ,&numberOfReadyToRunProcesses);
+	selectedProcess=Heap_poll(readyToRunQueue[queueID],QUEUE_PRIORITY ,&numberOfReadyToRunProcesses[queueID]);
 	// Return most priority process or NOPROCESS if empty queue
 	return selectedProcess; 
 }
@@ -484,18 +484,12 @@ void Cambio_Estado(int ID, int anterior, char const *posterior){
 	posterior);
 	
 }
-//void Imprimir_String(char const *cadena) {
-//	#define ANSI_COLOR_BLUE    "\x1b[34m"
-//	#define ANSI_COLOR_RESET   "\x1b[0m"
-//	printf(ANSI_COLOR_BLUE "\t");
-//	printf("%s", cadena);
-//	printf(ANSI_COLOR_RESET "\n");
-//}
-//void Imprimir_Int(int entero) {
-//	#define ANSI_COLOR_BLUE    "\x1b[34m"
-//	#define ANSI_COLOR_RESET   "\x1b[0m"
-//	printf(ANSI_COLOR_BLUE "\t");
-//	printf("%d", entero);
-//	printf(ANSI_COLOR_RESET "\n");
-//}
-
+void Test(char const *cadena, int numero){
+	#define ANSI_COLOR_BLUE "\x1b[34m"
+	#define ANSI_COLOR_RESET "\x1b[0m"
+	char chr;
+	printf(ANSI_COLOR_BLUE);
+	printf("\t%s %d >>", cadena, numero);
+	printf(ANSI_COLOR_RESET);
+	scanf("%c",&chr);
+}
