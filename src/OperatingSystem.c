@@ -245,17 +245,20 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 	processTable[PID].programListIndex=processPLIndex;
 	// Daemons run in protected mode and MMU use real address
 	if (programList[processPLIndex]->type == DAEMONPROGRAM) {
+		//Ejericio 11
+
+		processTable[PID].queueID=1;
 		processTable[PID].copyOfPCRegister=initialPhysicalAddress;
 		processTable[PID].copyOfPSWRegister= ((unsigned int) 1) << EXECUTION_MODE_BIT;
 	} 
 	else {
+		processTable[PID].queueID=0;
 		processTable[PID].copyOfPCRegister=0;
 		processTable[PID].copyOfPSWRegister=0;
 	}
 	//New process [SystemIdleProcess] moving to the [NEW] state
 	ComputerSystem_DebugMessage(111, SYSPROC, programList[processTable[PID].programListIndex]->executableName);
-
-
+	printf("processTable[PID].queueID = %d\n", processTable[PID].queueID);
 }
 
 
@@ -263,7 +266,7 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 // a queue of identifiers of READY processes
 void OperatingSystem_MoveToTheREADYState(int PID) {
 	//Ejercicio 11 TODO - 2
-	if (Heap_add(PID, &readyToRunQueue[processTable[PID].queueID],QUEUE_PRIORITY,&numberOfReadyToRunProcesses[processTable[PID].queueID],PROCESSTABLEMAXSIZE)>=0) {
+	if (Heap_add(PID, readyToRunQueue[processTable[PID].queueID],QUEUE_PRIORITY,&numberOfReadyToRunProcesses[processTable[PID].queueID],PROCESSTABLEMAXSIZE)>=0) {
 		int anterior = processTable[PID].state;
 		processTable[PID].state=READY;
 		Cambio_Estado(PID, anterior, "READY");
@@ -287,9 +290,9 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 int OperatingSystem_ShortTermScheduler() {
 	int selectedProcess = NOPROCESS;
 	int i;
-	for (i = 0; i < NUMBEROFQUEUES && selectedProcess == NOPROCESS; i++)
+	for (i = 0; i < NUMBEROFQUEUES && selectedProcess == NOPROCESS; i++){
 		selectedProcess = OperatingSystem_ExtractFromReadyToRun(i);
-
+	}
 	return selectedProcess;
 }
 
@@ -300,7 +303,6 @@ int OperatingSystem_ExtractFromReadyToRun(int i) {
   
 	int selectedProcess=NOPROCESS;
 	selectedProcess=Heap_poll(readyToRunQueue[i],QUEUE_PRIORITY ,&numberOfReadyToRunProcesses);
-	
 	// Return most priority process or NOPROCESS if empty queue
 	return selectedProcess; 
 }
@@ -458,11 +460,12 @@ void OperatingSystem_PrintReadyToRunQueue(){
 	int j = 0;
 	//TODO warning: comparison between pointer and integer
 	for (j = 0; j < 2; j++) {
+		ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[j]);
 		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
 			int identificador = readyToRunQueue[j][i];
 			int prioridad = processTable[identificador].priority;
 			if (i == 0) {
-				ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[j], identificador, prioridad);
+				ComputerSystem_DebugMessage(113, SHORTTERMSCHEDULE, identificador, prioridad);
 			} else {
 				ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE, identificador, prioridad);
 			}

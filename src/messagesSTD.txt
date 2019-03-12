@@ -27,7 +27,8 @@
 111,New process [@G%s@@] moving to the [@GNEW@@] state\n
 
 //Ejercicio 11
-112,\t%s: [@G%d@@,%d]
+112,\t%s: 
+113,[@G%d@@,%d]
 
 //Ejercicio 12
 115,Process [@G%d - %s@@] will transfer the control of the processor to process [@G%d - %s@@]
