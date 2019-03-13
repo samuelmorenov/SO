@@ -177,13 +177,16 @@ void Processor_DecodeAndExecuteInstruction() {
 
 		// Instruction HALT
 		case 'h':
-			//if(registerPSW_CPU == 128)
+			if (Processor_PSW_BitState(EXECUTION_MODE_BIT)){
 				Processor_ActivatePSW_Bit(POWEROFF_BIT);
 			break;
+			}else{
+				break;
+			}
 			  
 		// Instruction OS
 		case 'o': // Make a operating system routine in entry point indicated by operand1
-			//if(registerPSW_CPU == 128){
+			if (Processor_PSW_BitState(EXECUTION_MODE_BIT)){
 				// Show final part of HARDWARE message with CPU registers
 				// Show message: " (PC: registerPC_CPU, Accumulator: registerAccumulator_CPU, PSW: registerPSW_CPU [Processor_ShowPSW()]\n
 				ComputerSystem_DebugMessage(3, HARDWARE,operationCode,operand1,operand2,registerPC_CPU,registerAccumulator_CPU,registerPSW_CPU,Processor_ShowPSW());
@@ -192,17 +195,19 @@ void Processor_DecodeAndExecuteInstruction() {
 				registerPC_CPU++;
 				// Update PSW bits (ZERO_BIT, NEGATIVE_BIT, ...)
 				Processor_UpdatePSW();
-				return; // Note: message show before... for operating system messages after...
-			//}
-			//break;
+			}
+			return; // Note: message show before... for operating system messages after...
+
 
 		// Instruction IRET
 		case 'y': // Return from a interrupt handle manager call
-			//if(registerPSW_CPU == 128){
+			if (Processor_PSW_BitState(EXECUTION_MODE_BIT)){
 				registerPC_CPU=Processor_CopyFromSystemStack(MAINMEMORYSIZE-1);
 				registerPSW_CPU=Processor_CopyFromSystemStack(MAINMEMORYSIZE-2);
-			//}
 			break;		
+			}else{
+				break;
+			}
 
 
 

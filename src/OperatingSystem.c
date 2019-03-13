@@ -92,7 +92,10 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	OperatingSystem_PrepareDaemons(daemonsIndex);
 	
 	// Create all user processes from the information given in the command line
-	OperatingSystem_LongTermScheduler();
+	//Ejercicio 14
+	if(OperatingSystem_LongTermScheduler() == 0){
+		OperatingSystem_TerminateProcess();
+	}
 	
 	if (strcmp(programList[processTable[sipID].programListIndex]->executableName,"SystemIdleProcess")) {
 		// Show message "ERROR: Missing SIP program!\n"

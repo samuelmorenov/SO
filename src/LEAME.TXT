@@ -16,3 +16,5 @@
 	b. Sí, al menos habría que guardar el Acumulador.
 	c. Sí, habría que obtejer el acumulador guardado para restaurarlo
 	d. Sí, habría que añadir un campo en la definicion de PCB para añadir el acumulador
+- Ejercicio 14: Añadido el fin de la simulacion cuando no se pueden crear procesos de usuario
+- Ejercicio 15: Añadida la restriccion del procesador que solo permite acceder a las funciones HALT, OS, IRET en modo protected
