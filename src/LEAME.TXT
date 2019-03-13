@@ -1,0 +1,8 @@
+Respuesta del ejercicio 3:
+No se ejecutaba 2 veces al usar HALT que finaliza el sistema entero
+
+Respuestas del ejercicio 13:
+a. Para que cuando el programa vuelva a ejecucion siga por donde lo había dejado
+b. Sí, al menos habría que guardar el Acumulador.
+c. Sí, habría que obtejer el acumulador guardado para restaurarlo
+d. Sí, habría que añadir un campo en la definicion de PCB para añadir el acumulador
