@@ -69,6 +69,7 @@ PROGRAMS_DATA *programList[PROGRAMSMAXNUMBER];
 int executingProgressID = NOPROCESS;
 
 // Initial set of tasks of the OS
+//Ejercicio 14
 void OperatingSystem_Initialize(int daemonsIndex) {
 	
 	int i, selectedProcess;
@@ -349,6 +350,7 @@ void OperatingSystem_PreemptRunningProcess() {
 
 
 // Save in the process' PCB essential values stored in hardware registers and the system stack
+// Ejercicio 13 - TODO
 void OperatingSystem_SaveContext(int PID) {
 	
 	// Load PC saved for interrupt manager
@@ -356,7 +358,6 @@ void OperatingSystem_SaveContext(int PID) {
 	
 	// Load PSW saved for interrupt manager
 	processTable[PID].copyOfPSWRegister=Processor_CopyFromSystemStack(MAINMEMORYSIZE-2);
-	
 }
 
 
