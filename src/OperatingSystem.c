@@ -30,6 +30,7 @@ void OperatingSystem_HandleSystemCall();
 void OperatingSystem_PrintReadyToRunQueue();
 void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior);
 void OperatingSystem_Transfer();
+void OperatingSystem_HandleClockInterrupt();
 
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
@@ -222,7 +223,7 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	OperatingSystem_PCBInitialization(PID, loadingPhysicalAddress, processSize, priority, indexOfExecutableProgram);
 	// Show message "Process [PID] created from program [executableName]\n"
 	ComputerSystem_DebugMessage(22,INIT,PID,executableProgram->executableName);
-	
+
 	return PID;
 }
 
@@ -462,6 +463,11 @@ void OperatingSystem_InterruptLogic(int entryPoint){
 		case EXCEPTION_BIT: // EXCEPTION_BIT=6
 			OperatingSystem_HandleException();
 			break;
+		case CLOCKINT_BIT: // CLOCKINT_BIT=9
+			OperatingSystem_HandleClockInterrupt();
+			break;
+
+
 	}
 
 }
@@ -516,13 +522,22 @@ void OperatingSystem_PrintReadyToRunQueue(){
 }
 
 void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior){
-	ComputerSystem_DebugMessage(110, SYSPROC, 
+	ComputerSystem_DebugMessage(110, SYSPROC,
 	ID,
 	programList[processTable[ID].programListIndex]->executableName,
 	statesNames[anterior],
 	posterior);
 	
 }
+
+// In OperatingSystem.c Exercise 2-b of V2
+// Ejercicio 2 - TODO Pega el código de debajo en el fichero indicado en el
+// comentario correspondiente y añade la función prototipo donde sea necesario.
+void OperatingSystem_HandleClockInterrupt(){
+	printf("\t-- Clock Interrupt --\n");
+	return;
+}
+
 //void Test(char const *cadena, int numero){
 //	#define ANSI_COLOR_BLUE "\x1b[34m"
 //	#define ANSI_COLOR_RESET "\x1b[0m"
