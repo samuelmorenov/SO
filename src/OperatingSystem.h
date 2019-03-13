@@ -31,7 +31,8 @@ enum ProgramTypes { USERPROGRAM, DAEMONPROGRAM };
 enum ProcessStates { NEW, READY, EXECUTING, BLOCKED, EXIT};
 
 // Enumerated type containing the list of system calls and their numeric identifiers
-enum SystemCallIdentifiers { SYSCALL_END=3, SYSCALL_PRINTEXECPID=5};
+//Ejercicio 12
+enum SystemCallIdentifiers { SYSCALL_END=3, SYSCALL_PRINTEXECPID=5, SYSCALL_YIELD=4};
 
 //Ejercicio 11 - 0/Enunciado
 #define NUMBEROFQUEUES 2

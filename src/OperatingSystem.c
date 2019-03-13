@@ -28,7 +28,8 @@ int OperatingSystem_ExtractFromReadyToRun();
 void OperatingSystem_HandleException();
 void OperatingSystem_HandleSystemCall();
 void OperatingSystem_PrintReadyToRunQueue();
-void Cambio_Estado(int ID, int anterior, char const *posterior);
+void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior);
+void OperatingSystem_Transfer();
 
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
@@ -46,7 +47,7 @@ int sipID;
 int baseDaemonsInProgramList; 
 
 // Array that contains the identifiers of the READY processes
-//Ejercicio 11 TODO - Enunciado
+//Ejercicio 11 - Enunciado
 //int readyToRunQueue[PROCESSTABLEMAXSIZE];
 int readyToRunQueue[NUMBEROFQUEUES][PROCESSTABLEMAXSIZE];
 //int numberOfReadyToRunProcesses=0;
@@ -60,7 +61,7 @@ int numberOfNotTerminatedUserProcesses=0;
 //Ejercicio 10
 char * statesNames [5]={"NEW","READY","EXECUTING","BLOCKED","EXIT"};
 
-//Ejercicio 11 TODO - 0
+//Ejercicio 11 - 0
 // Array that contains basic data abaut all deamons
 // and all user programs specified in the command line
 PROGRAMS_DATA *programList[PROGRAMSMAXNUMBER];
@@ -234,7 +235,7 @@ int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 
 
 // Assign initial values to all fields inside the PCB
-//Ejercicio 11 TODO 1 Sin hacer nada
+//Ejercicio 11 - 1
 void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int processSize, int priority, int processPLIndex) {
 
 	processTable[PID].busy=1;
@@ -264,11 +265,11 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 // Move a process to the READY state: it will be inserted, depending on its priority, in
 // a queue of identifiers of READY processes
 void OperatingSystem_MoveToTheREADYState(int PID) {
-	//Ejercicio 11 TODO - 2
+	//Ejercicio 11 - 2
 	if (Heap_add(PID, readyToRunQueue[processTable[PID].queueID],QUEUE_PRIORITY,&numberOfReadyToRunProcesses[processTable[PID].queueID],PROCESSTABLEMAXSIZE)>=0) {
 		int anterior = processTable[PID].state;
 		processTable[PID].state=READY;
-		Cambio_Estado(PID, anterior, "READY");
+		OperatingSystem_Cambio_Estado(PID, anterior, "READY");
 	} 
 	OperatingSystem_PrintReadyToRunQueue();
 }
@@ -285,7 +286,7 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 //	
 //	return selectedProcess;
 //}
-//Ejercicio 11 TODO - 3 Aqui añadio un for
+//Ejercicio 11 - 3
 int OperatingSystem_ShortTermScheduler() {
 	int selectedProcess = NOPROCESS;
 	int i;
@@ -297,7 +298,7 @@ int OperatingSystem_ShortTermScheduler() {
 
 
 // Return PID of more priority process in the READY queue
-// Ejercicio 11 TODO - 4 warning: passing argument 3 of ‘Heap_poll’ from incompatible pointer type
+// Ejercicio 11 - 4
 int OperatingSystem_ExtractFromReadyToRun(int queueID){
 
 	int selectedProcess=NOPROCESS;
@@ -316,7 +317,7 @@ void OperatingSystem_Dispatch(int PID) {
 	// Change the process' state
 	int anterior = processTable[PID].state;
 	processTable[PID].state=EXECUTING;
-	Cambio_Estado(executingProcessID, anterior, "EXECUTING");
+	OperatingSystem_Cambio_Estado(executingProcessID, anterior, "EXECUTING");
 	// Modify hardware registers with appropriate values for the process identified by PID
 	OperatingSystem_RestoreContext(PID);
 }
@@ -336,8 +337,8 @@ void OperatingSystem_RestoreContext(int PID) {
 
 
 // Function invoked when the executing process leaves the CPU 
+// Ejercicio 12 - TODO
 void OperatingSystem_PreemptRunningProcess() {
-
 	// Save in the process' PCB essential values stored in hardware registers and the system stack
 	OperatingSystem_SaveContext(executingProcessID);
 	// Change the process' state
@@ -375,7 +376,7 @@ void OperatingSystem_TerminateProcess() {
 	int selectedProcess;
   	int anterior = processTable[executingProcessID].state;
 	processTable[executingProcessID].state=EXIT;
-	Cambio_Estado(executingProcessID, anterior, "EXIT");
+	OperatingSystem_Cambio_Estado(executingProcessID, anterior, "EXIT");
 	
 	if (programList[processTable[executingProcessID].programListIndex]->type==USERPROGRAM) 
 		// One more user process that has terminated
@@ -410,7 +411,45 @@ void OperatingSystem_HandleSystemCall() {
 			ComputerSystem_DebugMessage(25,SYSPROC,executingProcessID,programList[processTable[executingProcessID].programListIndex]->executableName);
 			OperatingSystem_TerminateProcess();
 			break;
+
+		case SYSCALL_YIELD:
+			OperatingSystem_Transfer();
+			break;
+
+
 	}
+}
+//Ejercicio 12 - TODO
+// Process [1 – progName1] will transfer the control of the processor to process [3 – progName2]
+void OperatingSystem_Transfer(){
+	//Guardar datos del proceso actual:
+	int PID = executingProcessID;
+	char *name = programList[processTable[PID].programListIndex]->executableName;
+	int priority = processTable[PID].priority;
+	//Localizar proceso para cambiar:
+	int indexMasAlta = -1;
+	int j = 0;
+	int i = 0;
+	for (j = 0; j < 2; j++) {
+		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
+			int identificador = readyToRunQueue[j][i];
+			int prioridadAux = processTable[identificador].priority;
+			if(prioridadAux == priority){
+				indexMasAlta = identificador;
+			}
+		}
+	}
+	if(indexMasAlta == -1){
+		return;
+	}
+	char *nameMasAlta = programList[processTable[indexMasAlta].programListIndex]->executableName;
+	//Imprimir el cambio:
+	ComputerSystem_DebugMessage(115,SHORTTERMSCHEDULE, PID, name, indexMasAlta, nameMasAlta);
+	//Quitar el procesador al proceso actual:
+	OperatingSystem_PreemptRunningProcess();
+	//Dar el procesador al siguiente proceso:
+	OperatingSystem_Dispatch(indexMasAlta);
+	Test("Test",0);
 }
 	
 //	Implement interrupt logic calling appropriate interrupt handle
@@ -452,13 +491,12 @@ void OperatingSystem_PrintReadyToRunQueue(){
 	
 }
 */
-//Ejercicio 11 TODO 5
+//Ejercicio 11 - 5
  void OperatingSystem_PrintReadyToRunQueue() {
 	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
 
 	int i = 0;
 	int j = 0;
-	//TODO warning: comparison between pointer and integer
 	for (j = 0; j < 2; j++) {
 		ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[j]);
 		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
@@ -476,7 +514,7 @@ void OperatingSystem_PrintReadyToRunQueue(){
 
 }
 
-void Cambio_Estado(int ID, int anterior, char const *posterior){
+void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior){
 	ComputerSystem_DebugMessage(110, SYSPROC, 
 	ID,
 	programList[processTable[ID].programListIndex]->executableName,

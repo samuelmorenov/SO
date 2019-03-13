@@ -31,5 +31,5 @@
 113,[@G%d@@,%d]
 
 //Ejercicio 12
-115,Process [@G%d - %s@@] will transfer the control of the processor to process [@G%d - %s@@]
+115,Process [@G%d - %s@@] will transfer the control of the processor to process [@G%d - %s@@]\n
 
