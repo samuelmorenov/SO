@@ -2,13 +2,24 @@
 #include "OperatingSystem.h"
 #include "Processor.h"
 #include "Buses.h"
+#include "Clock.h"
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 
 // Code that students should NOT touch
-int OperatingSystem_lineBeginsWithANumber(char *);
 
+// Functions prototype
+int OperatingSystem_lineBeginsWithANumber(char *);
+void OperatingSystem_PrintSleepingProcessQueue();
+void OperatingSystem_PrintExecutingProcessInformation();
+void OperatingSystem_PrintProcessTableAssociation();
+
+extern int executingProcessID;
+#ifdef SLEEPINGQUEUE
+	extern char * queueNames []; 
+#endif
+	
 // Search for a free entry in the process table. The index of the selected entry
 // will be used as the process identifier
 int OperatingSystem_ObtainAnEntryInTheProcessTable() {
@@ -104,23 +115,19 @@ int OperatingSystem_LoadProgram(FILE *programFile, int initialAddress, int size)
 	while (fgets(lineRead, MAXLINELENGTH, programFile) != NULL) {
 		// REMARK: if lineRead is greater than MAXLINELENGTH in number of characters, the program
 		// loading does not work
-		// data.operationCode=' ';data.operand1=data.operand2=0;
 		opCode=' ';op1=op2=0;
 		token0=strtok(lineRead," ");
 		if (token0!=NULL && token0[0]!='/' && token0[0]!='\n') {
 			// I have an instruction with, at least, an operation code
-			// data.operationCode=tolower(token0[0]);
 			opCode=tolower(token0[0]);
 			token1=strtok(NULL," ");
 			if (token1!=NULL && token1[0]!='/') {
 				// I have an instruction with, at least, an operand
-				// data.operand1=atoi(token1);
 			    op1=atoi(token1);
 				token2=strtok(NULL," ");
 				if (token2!=NULL && token2[0]!='/') {
 					// The read line is similar to 'sum 2 3 //coment'
 					// I have an instruction with two operands
-					// data.operand2=atoi(token2);
 				  	op2=atoi(token2);
 				}
 			}
@@ -163,5 +170,108 @@ void OperatingSystem_ReadyToShutdown(){
 	// located at the last memory position used by that process, and dispatching sipId (next ShortTermSheduled)
 	processTable[sipID].copyOfPCRegister=processTable[sipID].initialPhysicalAddress+processTable[sipID].processSize-1;
 
+}
+
+
+// Show time messages
+void OperatingSystem_ShowTime(char section) {
+	ComputerSystem_DebugMessage(98,section,Processor_PSW_BitState(EXECUTION_MODE_BIT)?"\t":"");
+	ComputerSystem_DebugMessage(Processor_PSW_BitState(EXECUTION_MODE_BIT)?5:4,section,Clock_GetTime());
+}
+
+// Show general status
+void OperatingSystem_PrintStatus(){ 
+	OperatingSystem_PrintExecutingProcessInformation(); // Show executing process information
+	OperatingSystem_PrintReadyToRunQueue();  // Show Ready to run queues implemented for students
+	OperatingSystem_PrintSleepingProcessQueue(); // Show Sleeping process queue
+	OperatingSystem_PrintProcessTableAssociation(); // Show PID-Program's name association
+
+}
+
+ // Show Executing process information
+void OperatingSystem_PrintExecutingProcessInformation(){ 
+#ifdef SLEEPINGQUEUE
+
+	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
+	if (executingProcessID>=0)
+		// Show message "Running Process Information:\n\t\t[PID: executingProcessID, Priority: priority, WakeUp: whenToWakeUp, Queue: queueID]\n"
+		ComputerSystem_DebugMessage(28,SHORTTERMSCHEDULE,
+			executingProcessID,processTable[executingProcessID].priority,processTable[executingProcessID].whenToWakeUp
+			,queueNames[processTable[executingProcessID].queueID]);
+	else
+		ComputerSystem_DebugMessage(98,SHORTTERMSCHEDULE,"Running Process Information:\n\t\t[--- No running process ---]\n");
+
+#endif
+}
+
+// Show SleepingProcessQueue 
+void OperatingSystem_PrintSleepingProcessQueue(){ 
+#ifdef SLEEPINGQUEUE
+
+	int i;
+	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
+	//  Show message "SLEEPING Queue:\n\t\t");
+	ComputerSystem_DebugMessage(26,SHORTTERMSCHEDULE);
+	if (numberOfSleepingProcesses>0)
+		for (i=0; i< numberOfSleepingProcesses; i++) {
+			// Show message [PID, priority, whenToWakeUp]
+			ComputerSystem_DebugMessage(27,SHORTTERMSCHEDULE,
+			sleepingProcessesQueue[i],processTable[sleepingProcessesQueue[i]].priority,processTable[sleepingProcessesQueue[i]].whenToWakeUp);
+			if (i<numberOfSleepingProcesses-1)
+	  			ComputerSystem_DebugMessage(98,SHORTTERMSCHEDULE,", ");
+  		}
+  	else 
+	  	ComputerSystem_DebugMessage(98,SHORTTERMSCHEDULE,"[--- empty queue ---]");
+  ComputerSystem_DebugMessage(98,SHORTTERMSCHEDULE,"\n");
+
+#endif
+}
+
+void OperatingSystem_PrintProcessTableAssociation() {
+  int i;
+  OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
+  //  Show message "Process table association with program's name:");
+  ComputerSystem_DebugMessage(29,SHORTTERMSCHEDULE);
+  for (i=0; i< PROCESSTABLEMAXSIZE; i++) {
+  	if (processTable[i].busy) {
+  		// Show message PID -> program's name\n
+  		ComputerSystem_DebugMessage(30,SHORTTERMSCHEDULE,i,programList[processTable[i].programListIndex]->executableName);
+  	}
+  }
+}
+
+void OperatingSystem_PrepareTeachersDaemons(){
+	FILE *daemonsFile;
+	char lineRead[MAXLINELENGTH];
+	PROGRAMS_DATA *progData;
+	char *name, *arrivalTime;
+	int time;
+
+
+	daemonsFile= fopen("teachersDaemons", "r");
+
+	// Check if programFile exists
+	if (daemonsFile==NULL)
+		return;
+
+	while (fgets(lineRead, MAXLINELENGTH, daemonsFile) != NULL
+					 && baseDaemonsInProgramList<PROGRAMSMAXNUMBER) {
+		name=strtok(lineRead,",");
+	    if (name==NULL){
+			continue;
+		}
+
+		arrivalTime=strtok(NULL,",");
+    	if (arrivalTime==NULL
+    		|| sscanf(arrivalTime,"%d",&time)==0)
+    		time=0;
+    	
+    	progData=(PROGRAMS_DATA *) malloc(sizeof(PROGRAMS_DATA));
+    	progData->executableName = (char *) malloc((strlen(name)+1)*sizeof(char));
+    	strcpy(progData->executableName,name);
+    	progData->arrivalTime=time;
+    	progData->type=DAEMONPROGRAM;
+    	programList[baseDaemonsInProgramList++]=progData;
+	}
 }
 

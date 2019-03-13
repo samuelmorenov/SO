@@ -1,12 +1,13 @@
 #include "Clock.h"
 #include "Processor.h"
-#include "ComputerSystem.h"
+// #include "ComputerSystem.h"
 
 int tics=0;
 
 void Clock_Update() {
+
 	tics++;
-    ComputerSystem_DebugMessage(97,CLOCK,tics);
+    // ComputerSystem_DebugMessage(97,CLOCK,tics);
 }
 
 

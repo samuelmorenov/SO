@@ -11,7 +11,7 @@ void Heap_swap_Down(int, int[], int, int);
 // Insertion of a PID into a binary heap
 // info: PID to insert
 // heap: Binary heap to insert: user o daemon ready queue, sleeping queue, ...
-// queueType: QUEUE_PRIORITY, QUEUE_ARRIVAL, ...
+// queueType: QUEUE_PRIORITY, QUEUE_WAKEUP, QUEUE_ARRIVAL, ...
 // numElem: number of elements actually into the queue, if successful is increased by one
 // limit: max size of the queue
 // return 0/-1  ok/fail
@@ -26,7 +26,7 @@ int Heap_add(int info, int heap[], int queueType, int *numElem, int limit) {
 
 // Extract the more priority item
 // heap: Binary heap to extract: user o daemon ready queue, sleeping queue, ...
-// queueType: QUEUE_PRIORITY, QUEUE_ARRIVAL, ...
+// queueType: QUEUE_PRIORITY, QUEUE_WAKEUP, QUEUE_ARRIVAL, ...
 // numElem: number of elements actually into the queue, if successful is decremented by one
 // return more priority item into the queue
 int Heap_poll(int heap[], int queueType, int *numElem) {
@@ -97,6 +97,15 @@ int Heap_compare_priority(int value1, int value2) {
   return processTable[value2].priority-processTable[value1].priority;
 }
 
+// Auxiliary for  WakeUp-time comparations
+int Heap_compare_wakeup(int value1, int value2) {
+#ifdef SLEEPINGQUEUE
+	return processTable[value2].whenToWakeUp - processTable[value1].whenToWakeUp;
+#else
+	return 0;
+#endif
+}
+
 // Auxiliary for assert-time comparations
 int Heap_compare_assertsTime(int value1, int value2) {
   return asserts[value2].time - asserts[value1].time;
@@ -106,6 +115,8 @@ int Heap_compare_assertsTime(int value1, int value2) {
 int Heap_compare(int value1, int value2, int queueType) {
   
   switch (queueType) {
+	case QUEUE_WAKEUP:
+	  return Heap_compare_wakeup(value1, value2);
 	case QUEUE_PRIORITY:
 	  return Heap_compare_priority(value1, value2);
 	case QUEUE_ASSERTS:
@@ -114,3 +125,5 @@ int Heap_compare(int value1, int value2, int queueType) {
 	  return 0; // 
   }
 }
+
+
