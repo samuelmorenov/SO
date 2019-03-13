@@ -1,9 +1,15 @@
 // prog-V1-E12
 30
 6
-ADD 5 0
+NOP
+NOP
 TRAP 4
-INC -1
-ZJUMP 2 // Si el acumulador==0 en la última operación, saltar dos posiciones hacia adelante
-JUMP -3 // Saltar tres posiciones de memoria hacia atrás
+NOP
+NOP
+TRAP 4
+NOP
+NOP
+TRAP 4
+NOP
+NOP
 TRAP 3

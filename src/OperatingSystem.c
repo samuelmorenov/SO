@@ -337,7 +337,7 @@ void OperatingSystem_RestoreContext(int PID) {
 
 
 // Function invoked when the executing process leaves the CPU 
-// Ejercicio 12 - TODO
+// Ejercicio 12
 void OperatingSystem_PreemptRunningProcess() {
 	// Save in the process' PCB essential values stored in hardware registers and the system stack
 	OperatingSystem_SaveContext(executingProcessID);
@@ -419,13 +419,10 @@ void OperatingSystem_HandleSystemCall() {
 
 	}
 }
-//Ejercicio 12 - TODO
+//Ejercicio 12
 // Process [1 – progName1] will transfer the control of the processor to process [3 – progName2]
 void OperatingSystem_Transfer(){
-	//Guardar datos del proceso actual:
-	int PID = executingProcessID;
-	char *name = programList[processTable[PID].programListIndex]->executableName;
-	int priority = processTable[PID].priority;
+	int priority = processTable[executingProcessID].priority;
 	//Localizar proceso para cambiar:
 	int indexMasAlta = -1;
 	int j = 0;
@@ -442,14 +439,14 @@ void OperatingSystem_Transfer(){
 	if(indexMasAlta == -1){
 		return;
 	}
-	char *nameMasAlta = programList[processTable[indexMasAlta].programListIndex]->executableName;
 	//Imprimir el cambio:
-	ComputerSystem_DebugMessage(115,SHORTTERMSCHEDULE, PID, name, indexMasAlta, nameMasAlta);
+	char *nameMasAlta = programList[processTable[indexMasAlta].programListIndex]->executableName;
+	char *name = programList[processTable[executingProcessID].programListIndex]->executableName;
+	ComputerSystem_DebugMessage(115,SHORTTERMSCHEDULE, executingProcessID, name, indexMasAlta, nameMasAlta);
 	//Quitar el procesador al proceso actual:
 	OperatingSystem_PreemptRunningProcess();
 	//Dar el procesador al siguiente proceso:
 	OperatingSystem_Dispatch(indexMasAlta);
-	Test("Test",0);
 }
 	
 //	Implement interrupt logic calling appropriate interrupt handle
@@ -522,12 +519,12 @@ void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior){
 	posterior);
 	
 }
-void Test(char const *cadena, int numero){
-	#define ANSI_COLOR_BLUE "\x1b[34m"
-	#define ANSI_COLOR_RESET "\x1b[0m"
-	char chr;
-	printf(ANSI_COLOR_BLUE);
-	printf("\t%s %d >>", cadena, numero);
-	printf(ANSI_COLOR_RESET);
-	scanf("%c",&chr);
-}
+//void Test(char const *cadena, int numero){
+//	#define ANSI_COLOR_BLUE "\x1b[34m"
+//	#define ANSI_COLOR_RESET "\x1b[0m"
+//	char chr;
+//	printf(ANSI_COLOR_BLUE);
+//	printf("\t%s %d >>", cadena, numero);
+//	printf(ANSI_COLOR_RESET);
+//	scanf("%c",&chr);
+//}
