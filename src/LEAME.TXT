@@ -1,0 +1,18 @@
+- Ejercicio 0: Añadida la opcion MEMADD de la V0 en Processor.c
+- Ejercicio 1: Añadida la funcionalidad en ComputerSystem.c
+- Ejercicio 2: Añadida la funcionalidad en ComputerSystem.c
+- Ejercicio 3: No se ejecutaba 2 veces al usar HALT que finaliza el sistema entero.
+- Ejercicio 4: Ahora al ejecutar mas programas de los permitidos muestra el mensaje de error.
+- Ejercicio 5: Añadido el error cuando el programa no es valido
+- Ejercicio 6: No se comprobaba que el tamaño fuese correcto, ahora sí, da error.
+- Ejercicio 7: Modificada la funcion para que de error.
+- Ejercicio 8: Cambiado la constante INITIALPID a 3, funciona correctamente.
+- Ejercicio 9: Añadida la funcion OperatingSystem_PrintReadyToRunQueue() que imprime la cola de procesos listos.
+- Ejercicio 10: Ahora cuando un proceso cambia de estado se muestra un mensaje
+- Ejercicio 11: Implementada correctamente la cola multinivel.
+- Ejercicio 12: Añadida la opcion de que un proceso pueda ceder el procesador a otro.
+- Ejercicio 13:
+	a. Para que cuando el programa vuelva a ejecucion siga por donde lo había dejado
+	b. Sí, al menos habría que guardar el Acumulador.
+	c. Sí, habría que obtejer el acumulador guardado para restaurarlo
+	d. Sí, habría que añadir un campo en la definicion de PCB para añadir el acumulador
