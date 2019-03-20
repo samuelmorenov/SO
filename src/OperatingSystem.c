@@ -32,6 +32,8 @@ void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior);
 void OperatingSystem_TransferWithEcualPriority();
 void OperatingSystem_HandleClockInterrupt();
 void OperatingSystem_MoveToTheSleepingProcessesQueue();
+void OperatingSystem_WakeUpProcesses();
+int OperatingSystem_ExtractFromSleepingQueue(int queueID);
 void Test(char const *cadena, int numero);
 
 // The process table
@@ -316,12 +318,18 @@ int OperatingSystem_ShortTermScheduler() {
 // Return PID of more priority process in the READY queue
 // Ejercicio 11 - 4
 int OperatingSystem_ExtractFromReadyToRun(int queueID){
-
 	int selectedProcess=NOPROCESS;
 	//selectedProcess=Heap_poll(readyToRunQueue,QUEUE_PRIORITY ,&numberOfReadyToRunProcesses);
 	selectedProcess=Heap_poll(readyToRunQueue[queueID],QUEUE_PRIORITY ,&numberOfReadyToRunProcesses[queueID]);
 	// Return most priority process or NOPROCESS if empty queue
 	return selectedProcess; 
+}
+
+//Ejercicio 6: Saca el elemento queueID de la cola de dormidos
+int OperatingSystem_ExtractFromSleepingQueue(int queueID){
+	int selectedProcess=NOPROCESS;
+	selectedProcess=Heap_poll(sleepingProcessesQueue,QUEUE_WAKEUP,&numberOfSleepingProcesses);
+	return selectedProcess;
 }
 
 
@@ -443,6 +451,7 @@ void OperatingSystem_HandleSystemCall() {
 //Ejercicio 12
 // Process [1 – progName1] will transfer the control of the processor to process [3 – progName2]
 void OperatingSystem_TransferWithEcualPriority(){
+	int IDActual = executingProcessID;
 	int priority = processTable[executingProcessID].priority;
 	//Localizar proceso para cambiar:
 	int indexMasAlta = -1;
@@ -468,9 +477,12 @@ void OperatingSystem_TransferWithEcualPriority(){
 	OperatingSystem_PreemptRunningProcess();
 	//Dar el procesador al siguiente proceso:
 	OperatingSystem_Dispatch(indexMasAlta);
+
+	OperatingSystem_ExtractFromReadyToRun(IDActual); //TODO Ver si saca bien de la cola
 }
 
 void OperatingSystem_TransferWithoutEcualPriority(){
+	int IDActual = executingProcessID;
 	//Localizar proceso para cambiar:
 	int indexMasAlta = -1;
 	int j = 0;
@@ -494,6 +506,8 @@ void OperatingSystem_TransferWithoutEcualPriority(){
 	OperatingSystem_PreemptRunningProcess();
 	//Dar el procesador al siguiente proceso:
 	OperatingSystem_Dispatch(indexMasAlta);
+
+	OperatingSystem_ExtractFromReadyToRun(IDActual); //TODO Ver si saca bien de la cola
 }
 	
 //	Implement interrupt logic calling appropriate interrupt handle
@@ -586,7 +600,27 @@ void OperatingSystem_HandleClockInterrupt(){
 	//OperatingSystem_ShowTime(INTERRUPT);
 	ComputerSystem_DebugMessage(120, INTERRUPT, numberOfClockInterrupts);
 	numberOfClockInterrupts = numberOfClockInterrupts + 1;
+
+	//Ejercicio 6
+	OperatingSystem_WakeUpProcesses();
 	return;
+}
+
+//Ejercicio 6: Si el campo whenToWakeUp de un proceso (o más de uno) de la cola
+//sleepingProcessesQueue coincide con el número de interrupciones de reloj
+//ocurridas hasta el momento, el proceso se desbloqueará, pasando al estado READY
+//y siendo eliminado de la sleepingProcessesQueue.
+void OperatingSystem_WakeUpProcesses(){
+	int i = 0;
+	for (i = 0; i < numberOfSleepingProcesses; i++) {
+		int identificador = sleepingProcessesQueue[i];
+		if(processTable[identificador].whenToWakeUp <= numberOfClockInterrupts){
+			OperatingSystem_ExtractFromSleepingQueue(identificador);
+
+			//TODO Ejercicio 6 Pasar a estado listo
+			Test("Test", 1);
+		}
+	}
 }
 
 void OperatingSystem_MoveToTheSleepingProcessesQueue() {
@@ -597,24 +631,14 @@ void OperatingSystem_MoveToTheSleepingProcessesQueue() {
 	int whenToWakeUp = acumulador + numberOfClockInterrupts + 1;
 	processTable[PID].whenToWakeUp = whenToWakeUp;
 
-
 	if (Heap_add(PID, sleepingProcessesQueue,processTable[PID].whenToWakeUp,&numberOfSleepingProcesses,PROCESSTABLEMAXSIZE) >= 0){
 	  	int anterior = processTable[PID].state;
 		processTable[PID].state=BLOCKED;
 		OperatingSystem_Cambio_Estado(PID, anterior, "BLOCKED");
-
-		//Sacar el proceso del procesador
 		OperatingSystem_TransferWithoutEcualPriority();
-		//Meter un nuevo proceso en el procesador
-
+		OperatingSystem_PrintStatus();
 	}
-	Test("Test", 0);
-	OperatingSystem_PrintStatus();
-	Test("Test", 1);
-	// TODO Ejercicio 5 - Dispatch?
-
 }
-
 
 void Test(char const *cadena, int numero){
 	#define ANSI_COLOR_BLUE "\x1b[34m"
