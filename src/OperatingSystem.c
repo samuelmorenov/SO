@@ -31,6 +31,7 @@ void OperatingSystem_PrintReadyToRunQueue();
 void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior);
 void OperatingSystem_Transfer();
 void OperatingSystem_HandleClockInterrupt();
+void OperatingSystem_MoveToTheSleepingProcessesQueue(int PID);
 
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
@@ -69,7 +70,14 @@ PROGRAMS_DATA *programList[PROGRAMSMAXNUMBER];
 
 int executingProgressID = NOPROCESS;
 
+//Ejercicio 4
 int numberOfClockInterrupts = 0;
+
+// TODO Ejercicio 5 Pega este código en el fichero indicado:
+// In OperatingSystem.c Exercise 5-b of V2
+// Heap with blocked processes sort by when to wakeup
+int sleepingProcessesQueue[PROCESSTABLEMAXSIZE];
+int numberOfSleepingProcesses=0;
 
 // Initial set of tasks of the OS
 //Ejercicio 14
@@ -422,6 +430,11 @@ void OperatingSystem_HandleSystemCall() {
 		case SYSCALL_YIELD:
 			OperatingSystem_Transfer();
 			break;
+		//Todo Ejercicio 5
+		case SYSCALL_SLEEP:
+			OperatingSystem_MoveToTheSleepingProcessesQueue(executingProcessID);
+			break;
+
 
 
 	}
@@ -535,7 +548,7 @@ void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior){
 // In OperatingSystem.c Exercise 2-b of V2
 // Ejercicio 2 - Pega el código de debajo en el fichero indicado en el
 // comentario correspondiente y añade la función prototipo donde sea necesario.
-// Ejercicio 4 - TODO Modifica la rutina OperatingSystem_HandleClockInterrupt() para
+// Ejercicio 4 - Modifica la rutina OperatingSystem_HandleClockInterrupt() para
 // que cuente el número total de interrupciones de reloj ocurridas
 // (en la variable numberOfClockInterrupts) y muestre un mensaje en pantalla
 // con el aspecto siguiente (número de mensaje 120, sección INTERRUPT, y color Cyan).
@@ -547,12 +560,31 @@ void OperatingSystem_HandleClockInterrupt(){
 	return;
 }
 
-//void Test(char const *cadena, int numero){
-//	#define ANSI_COLOR_BLUE "\x1b[34m"
-//	#define ANSI_COLOR_RESET "\x1b[0m"
-//	char chr;
-//	printf(ANSI_COLOR_BLUE);
-//	printf("\t%s %d >>", cadena, numero);
-//	printf(ANSI_COLOR_RESET);
-//	scanf("%c",&chr);
-//}
+void OperatingSystem_MoveToTheSleepingProcessesQueue(int PID) {
+	//TODO Ejercicio 5
+	processTable[PID].whenToWakeUp = numberOfClockInterrupts + 1;
+
+
+//	if (
+//			Heap_add(PID, sleepingProcessesQueue[processTable[PID].queueID],QUEUE_PRIORITY,&numberOfReadyToRunProcesses[processTable[PID].queueID],PROCESSTABLEMAXSIZE)
+//			>=
+//			0
+//			) {
+//		int anterior = processTable[PID].state;
+//		processTable[PID].state=READY;
+//		OperatingSystem_Cambio_Estado(PID, anterior, "READY");
+//	}
+
+	Test("Movido, whenToWakeUp = ", processTable[PID].whenToWakeUp);
+}
+
+
+void Test(char const *cadena, int numero){
+	#define ANSI_COLOR_BLUE "\x1b[34m"
+	#define ANSI_COLOR_RESET "\x1b[0m"
+	char chr;
+	printf(ANSI_COLOR_BLUE);
+	printf("\t%s %d >>", cadena, numero);
+	printf(ANSI_COLOR_RESET);
+	scanf("%c",&chr);
+}
