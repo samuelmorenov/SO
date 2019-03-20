@@ -44,12 +44,18 @@ void Processor_InitializeInterruptVectorTable(int interruptVectorInitialAddress)
 // This is the instruction cycle loop (fetch, decoding, execution, etc.).
 // The processor stops working when an POWEROFF signal is stored in its
 // PSW register
+//Ejercicio 3
+// TODO: Modifica la condición de llamada al manejador de interrupciones de la función
+// Processor_InstructionCycleLoop() para que incluya la condición de que NO
+// estén enmascaradas las interrupciones, para llamar al manejador de interrupciones.
 void Processor_InstructionCycleLoop() {
 
 	while (!Processor_PSW_BitState(POWEROFF_BIT)) {
 		if (Processor_FetchInstruction()==CPU_SUCCESS)
 			Processor_DecodeAndExecuteInstruction();
-		if (interruptLines_CPU)
+//		if (interruptLines_CPU)
+//			Processor_ManageInterrupts();
+		if (interruptLines_CPU && !Processor_PSW_BitState(INTERRUPT_MASKED_BIT))
 			Processor_ManageInterrupts();
 	}
 }
@@ -269,6 +275,11 @@ char * Processor_ShowPSW(){
 		pswmask[tam-ZERO_BIT]='Z';
 	if (Processor_PSW_BitState(POWEROFF_BIT))
 		pswmask[tam-POWEROFF_BIT]='S';
+	//Ejercicio 3 TODO Para que muestre en la PSW el nuevo bit (en la representación con letras de los bits),
+	// hay que modificar la función Processor_ShowPSW() que es la que la muestra. Para
+	// hacerlo, añade antes del return de la función Processor_ShowPSW()
+	if (Processor_PSW_BitState(INTERRUPT_MASKED_BIT))
+	    pswmask[tam-INTERRUPT_MASKED_BIT]='M';
 	return pswmask;
 }
 

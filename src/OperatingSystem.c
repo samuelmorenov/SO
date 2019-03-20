@@ -531,7 +531,7 @@ void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior){
 }
 
 // In OperatingSystem.c Exercise 2-b of V2
-// Ejercicio 2 - TODO Pega el código de debajo en el fichero indicado en el
+// Ejercicio 2 - Pega el código de debajo en el fichero indicado en el
 // comentario correspondiente y añade la función prototipo donde sea necesario.
 void OperatingSystem_HandleClockInterrupt(){
 	printf("\t-- Clock Interrupt --\n");

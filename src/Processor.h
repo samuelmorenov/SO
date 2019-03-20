@@ -11,7 +11,7 @@
 // Enumerated type that connects bit positions in the PSW register with
 // processor events and status
 // Transparencias de clase
-// Ejercicio 2
+// Ejercicio 3 TODO Añade el valor INTERRUPT_MASKED_BIT=15 al enumerado PSW_BITS en Processor.h
 enum PSW_BITS {POWEROFF_BIT=0, ZERO_BIT=1, NEGATIVE_BIT=2, OVERFLOW_BIT=3,
 	EXECUTION_MODE_BIT=7, INTERRUPT_MASKED_BIT=15};
 
