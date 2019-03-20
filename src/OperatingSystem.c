@@ -69,6 +69,8 @@ PROGRAMS_DATA *programList[PROGRAMSMAXNUMBER];
 
 int executingProgressID = NOPROCESS;
 
+int numberOfClockInterrupts = 0;
+
 // Initial set of tasks of the OS
 //Ejercicio 14
 void OperatingSystem_Initialize(int daemonsIndex) {
@@ -533,8 +535,15 @@ void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior){
 // In OperatingSystem.c Exercise 2-b of V2
 // Ejercicio 2 - Pega el código de debajo en el fichero indicado en el
 // comentario correspondiente y añade la función prototipo donde sea necesario.
+// Ejercicio 4 - TODO Modifica la rutina OperatingSystem_HandleClockInterrupt() para
+// que cuente el número total de interrupciones de reloj ocurridas
+// (en la variable numberOfClockInterrupts) y muestre un mensaje en pantalla
+// con el aspecto siguiente (número de mensaje 120, sección INTERRUPT, y color Cyan).
+// Para el tiempo, usad la función OperatingSystem_ShowTime(INTERRUPT)
+
 void OperatingSystem_HandleClockInterrupt(){
-	printf("\t-- Clock Interrupt --\n");
+	ComputerSystem_DebugMessage(120, INTERRUPT, numberOfClockInterrupts);
+	numberOfClockInterrupts = numberOfClockInterrupts + 1;
 	return;
 }
 
