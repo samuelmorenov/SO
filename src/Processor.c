@@ -1,6 +1,8 @@
 #include "Processor.h"
 #include "ProcessorBase.h"
 #include "OperatingSystem.h"
+#include "OperatingSystemBase.h"
+#include "Clock.h"
 #include "Buses.h"
 #include "MMU.h"
 #include <stdio.h>
@@ -53,7 +55,7 @@ void Processor_InstructionCycleLoop() {
 	while (!Processor_PSW_BitState(POWEROFF_BIT)) {
 
 		//TODO Ejercicio 1
-		OperatingSystem_ShowTime(Clock_GetTime());
+		//OperatingSystem_ShowTime(Clock_GetTime());
 
 		if (Processor_FetchInstruction()==CPU_SUCCESS)
 			Processor_DecodeAndExecuteInstruction();

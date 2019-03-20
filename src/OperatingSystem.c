@@ -29,9 +29,10 @@ void OperatingSystem_HandleException();
 void OperatingSystem_HandleSystemCall();
 void OperatingSystem_PrintReadyToRunQueue();
 void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior);
-void OperatingSystem_Transfer();
+void OperatingSystem_TransferWithEcualPriority();
 void OperatingSystem_HandleClockInterrupt();
-void OperatingSystem_MoveToTheSleepingProcessesQueue(int PID);
+void OperatingSystem_MoveToTheSleepingProcessesQueue();
+void Test(char const *cadena, int numero);
 
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
@@ -73,7 +74,7 @@ int executingProgressID = NOPROCESS;
 //Ejercicio 4
 int numberOfClockInterrupts = 0;
 
-// TODO Ejercicio 5 Pega este código en el fichero indicado:
+// Ejercicio 5 Pega este código en el fichero indicado:
 // In OperatingSystem.c Exercise 5-b of V2
 // Heap with blocked processes sort by when to wakeup
 int sleepingProcessesQueue[PROCESSTABLEMAXSIZE];
@@ -428,11 +429,11 @@ void OperatingSystem_HandleSystemCall() {
 			break;
 
 		case SYSCALL_YIELD:
-			OperatingSystem_Transfer();
+			OperatingSystem_TransferWithEcualPriority();
 			break;
-		//Todo Ejercicio 5
+		//Ejercicio 5
 		case SYSCALL_SLEEP:
-			OperatingSystem_MoveToTheSleepingProcessesQueue(executingProcessID);
+			OperatingSystem_MoveToTheSleepingProcessesQueue();
 			break;
 
 
@@ -441,7 +442,7 @@ void OperatingSystem_HandleSystemCall() {
 }
 //Ejercicio 12
 // Process [1 – progName1] will transfer the control of the processor to process [3 – progName2]
-void OperatingSystem_Transfer(){
+void OperatingSystem_TransferWithEcualPriority(){
 	int priority = processTable[executingProcessID].priority;
 	//Localizar proceso para cambiar:
 	int indexMasAlta = -1;
@@ -452,6 +453,32 @@ void OperatingSystem_Transfer(){
 			int identificador = readyToRunQueue[j][i];
 			int prioridadAux = processTable[identificador].priority;
 			if(prioridadAux == priority){
+				indexMasAlta = identificador;
+			}
+		}
+	}
+	if(indexMasAlta == -1){
+		return;
+	}
+	//Imprimir el cambio:
+	char *nameMasAlta = programList[processTable[indexMasAlta].programListIndex]->executableName;
+	char *name = programList[processTable[executingProcessID].programListIndex]->executableName;
+	ComputerSystem_DebugMessage(115,SHORTTERMSCHEDULE, executingProcessID, name, indexMasAlta, nameMasAlta);
+	//Quitar el procesador al proceso actual:
+	OperatingSystem_PreemptRunningProcess();
+	//Dar el procesador al siguiente proceso:
+	OperatingSystem_Dispatch(indexMasAlta);
+}
+
+void OperatingSystem_TransferWithoutEcualPriority(){
+	//Localizar proceso para cambiar:
+	int indexMasAlta = -1;
+	int j = 0;
+	int i = 0;
+	for (j = 0; j < 2; j++) {
+		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
+			int identificador = readyToRunQueue[j][i];
+			if(processTable[identificador].priority > processTable[indexMasAlta].priority){
 				indexMasAlta = identificador;
 			}
 		}
@@ -555,27 +582,37 @@ void OperatingSystem_Cambio_Estado(int ID, int anterior, char const *posterior){
 // Para el tiempo, usad la función OperatingSystem_ShowTime(INTERRUPT)
 
 void OperatingSystem_HandleClockInterrupt(){
+	//TODO Ejercicio 1 ?
+	//OperatingSystem_ShowTime(INTERRUPT);
 	ComputerSystem_DebugMessage(120, INTERRUPT, numberOfClockInterrupts);
 	numberOfClockInterrupts = numberOfClockInterrupts + 1;
 	return;
 }
 
-void OperatingSystem_MoveToTheSleepingProcessesQueue(int PID) {
-	//TODO Ejercicio 5
-	processTable[PID].whenToWakeUp = numberOfClockInterrupts + 1;
+void OperatingSystem_MoveToTheSleepingProcessesQueue() {
+	//Ejercicio 5
+	int PID = executingProcessID;
+	int acumulador = Processor_GetRegisterA(); // TODO Ejercicio 5 - valor actual del registro acumulador?
+	if(acumulador < 0) acumulador = 0 - acumulador;
+	int whenToWakeUp = acumulador + numberOfClockInterrupts + 1;
+	processTable[PID].whenToWakeUp = whenToWakeUp;
 
 
-//	if (
-//			Heap_add(PID, sleepingProcessesQueue[processTable[PID].queueID],QUEUE_PRIORITY,&numberOfReadyToRunProcesses[processTable[PID].queueID],PROCESSTABLEMAXSIZE)
-//			>=
-//			0
-//			) {
-//		int anterior = processTable[PID].state;
-//		processTable[PID].state=READY;
-//		OperatingSystem_Cambio_Estado(PID, anterior, "READY");
-//	}
+	if (Heap_add(PID, sleepingProcessesQueue,processTable[PID].whenToWakeUp,&numberOfSleepingProcesses,PROCESSTABLEMAXSIZE) >= 0){
+	  	int anterior = processTable[PID].state;
+		processTable[PID].state=BLOCKED;
+		OperatingSystem_Cambio_Estado(PID, anterior, "BLOCKED");
 
-	Test("Movido, whenToWakeUp = ", processTable[PID].whenToWakeUp);
+		//Sacar el proceso del procesador
+		OperatingSystem_TransferWithoutEcualPriority();
+		//Meter un nuevo proceso en el procesador
+
+	}
+	Test("Test", 0);
+	OperatingSystem_PrintStatus();
+	Test("Test", 1);
+	// TODO Ejercicio 5 - Dispatch?
+
 }
 
 

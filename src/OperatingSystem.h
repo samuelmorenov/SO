@@ -24,7 +24,7 @@
 
 #define NOPROCESS -1
 
-//TODO Ejercicio 5 Define SLEEPINGQUEUE en OperatingSystem.h para que compile el código que depende de que se hayan definido las estructuras de la cola de procesos bloqueados.
+//Ejercicio 5 Define SLEEPINGQUEUE en OperatingSystem.h para que compile el código que depende de que se hayan definido las estructuras de la cola de procesos bloqueados.
 #define SLEEPINGQUEUE
 
 // Contains the possible type of programs
@@ -35,7 +35,7 @@ enum ProcessStates { NEW, READY, EXECUTING, BLOCKED, EXIT};
 
 // Enumerated type containing the list of system calls and their numeric identifiers
 //Ejercicio 12
-//TODO Ejercicio 5 Añade una nueva llamada al sistema SYSCALL_SLEEP=7 que bloqueará al proceso en ejecución (es decir, se tendrá que mover al estado BLOCKED) y lo insertará por orden creciente del campo whenToWakeUp en la sleepingProcessesQueue.
+//Ejercicio 5 Añade una nueva llamada al sistema SYSCALL_SLEEP=7 que bloqueará al proceso en ejecución (es decir, se tendrá que mover al estado BLOCKED) y lo insertará por orden creciente del campo whenToWakeUp en la sleepingProcessesQueue.
 enum SystemCallIdentifiers { SYSCALL_END=3, SYSCALL_PRINTEXECPID=5, SYSCALL_YIELD=4, SYSCALL_SLEEP=7};
 
 //Ejercicio 11 - 0/Enunciado
@@ -53,7 +53,7 @@ typedef struct {
 	unsigned int copyOfPSWRegister;
 	int programListIndex;
 	int queueID; //Ejercicio 11 - Enunciado
-	int whenToWakeUp; // TODO Ejercicio 5 Añade a la struct PCB un campo adicional:
+	int whenToWakeUp; // Ejercicio 5 Añade a la struct PCB un campo adicional:
 } PCB;
 
 // These "extern" declaration enables other source code files to gain access
