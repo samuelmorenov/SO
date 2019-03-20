@@ -51,6 +51,10 @@ void Processor_InitializeInterruptVectorTable(int interruptVectorInitialAddress)
 void Processor_InstructionCycleLoop() {
 
 	while (!Processor_PSW_BitState(POWEROFF_BIT)) {
+
+		//TODO Ejercicio 1
+		OperatingSystem_ShowTime(Clock_GetTime());
+
 		if (Processor_FetchInstruction()==CPU_SUCCESS)
 			Processor_DecodeAndExecuteInstruction();
 //		if (interruptLines_CPU)
@@ -237,6 +241,7 @@ void Processor_DecodeAndExecuteInstruction() {
 	
 	// Show final part of HARDWARE message with	CPU registers
 	// Show message: " (PC: registerPC_CPU, Accumulator: registerAccumulator_CPU, PSW: registerPSW_CPU [Processor_ShowPSW()]\n
+
 	ComputerSystem_DebugMessage(3, HARDWARE, operationCode,operand1,operand2,registerPC_CPU,registerAccumulator_CPU,registerPSW_CPU,Processor_ShowPSW());
 }
 	
