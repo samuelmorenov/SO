@@ -26,13 +26,16 @@ int OperatingSystem_ShortTermScheduler();
 int OperatingSystem_ExtractFromReadyToRun();
 void OperatingSystem_HandleException();
 void OperatingSystem_HandleSystemCall();
-void OS_Print_ReadyToRunQueue();
-void OS_Cambio_Estado(int ID, int anterior, char const *posterior);
-void OS_TransferWithEcualPriority();
-void OS_HandleClockInterrupt();
-void OS_MoveToTheSleepingProcessesQueue();
-void OS_WakeUpProcesses();
-int OS_ExtractFromSleepingQueue(int queueID);
+void OperatingSystem_PrintReadyToRunQueue();
+void OperatingSystem_Print_Cambio_Estado(int ID, int anterior,
+		char const *posterior);
+void OperatingSystem_TransferWithEcualPriority();
+void OperatingSystem_HandleClockInterrupt();
+void OperatingSystem_MoveToTheSleepingProcessesQueue();
+void OperatingSystem_WakeUpProcesses();
+int OperatingSystem_ExtractFromSleepingQueue(int queueID);
+void OperatingSystem_Dormir_Proceso_Actual();
+int OperatingSystem_GetWhenToWakeUp();
 void Test(char const *cadena, int numero);
 
 // The process table
@@ -81,7 +84,10 @@ int sleepingProcessesQueue[PROCESSTABLEMAXSIZE];
 int numberOfSleepingProcesses = 0;
 
 // Initial set of tasks of the OS
-//Ejercicio 14
+/**
+ * Inicializa el sistema operativo
+ * Modificado: ejercicio V1.14
+ */
 void OperatingSystem_Initialize(int daemonsIndex) {
 
 	int i, selectedProcess;
@@ -131,6 +137,10 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 
 // Daemon processes are system processes, that is, they work together with the OS.
 // The System Idle Process uses the CPU whenever a user process is able to use it
+/**
+ * Carga el proceso Daemons
+ * Modificado: NO
+ */
 void OperatingSystem_PrepareDaemons(int programListDaemonsBase) {
 
 	// Include a entry for SystemIdleProcess at 0 position
@@ -148,18 +158,13 @@ void OperatingSystem_PrepareDaemons(int programListDaemonsBase) {
 
 }
 
-/////////////////////////////////////////////////////////////////////////////
-/*
- Modifica la funcion OperatingSystem_LongTermScheduler(), para que distinga el
- caso de creacion de proceso con oxito y el error en caso de que lo hubiese, indicondolo
- mediante la funcion ComputerSystem_DebugMessage(), utilizando el nomero de
- mensaje 103, y la constante ERROR como valor para el segundo argumento de la misma
- (seccion de interos). El mensaje debe tener el aspecto siguiente:
- */
-/////////////////////////////////////////////////////////////////////////////
 // The LTS is responsible of the admission of new processes in the system.
 // Initially, it creates a process from each program specified in the 
 // 			command lineand daemons programs
+/**
+ * Crea un proceso para cada programa. Da errores en caso de no poder
+ * Modificado: V1.11
+ */
 int OperatingSystem_LongTermScheduler() {
 
 	int PID, i, numberOfSuccessfullyCreatedProcesses = 0;
@@ -199,14 +204,11 @@ int OperatingSystem_LongTermScheduler() {
 	return numberOfSuccessfullyCreatedProcesses;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-/*
- Modifica la funcion OperatingSystem_CreateProcess(), para que devuelva a la
- funcion OperatingSystem_LongTermScheduler() el valor NOFREEENTRY cuando la
- primera funcion fracasa al intentar conseguir una entrada libre en la tabla de procesos.
- */
-/////////////////////////////////////////////////////////////////////////////
 // This function creates a process from an executable program
+/**
+ * Crea un proceso para un programa especificado en indexOfExecutableProgram
+ * Modificado: V1.11
+ */
 int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 
 	int PID;
@@ -249,6 +251,10 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 
 // Main memory is assigned in chunks. All chunks are the same size. A process
 // always obtains the chunk whose position in memory is equal to the processor identifier
+/**
+ * Asignacion de trozos de memoria
+ * Modificado: NO
+ */
 int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 
 	if (processSize > MAINMEMORYSECTIONSIZE)
@@ -258,7 +264,10 @@ int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 }
 
 // Assign initial values to all fields inside the PCB
-//Ejercicio 11 - 1
+/**
+ * Asigna los valores iniciales a un proceso PID
+ * Modificado: V1.11
+ */
 void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress,
 		int processSize, int priority, int processPLIndex) {
 
@@ -288,30 +297,30 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress,
 
 // Move a process to the READY state: it will be inserted, depending on its priority, in
 // a queue of identifiers of READY processes
+/**
+ * Añade el proceso PID a la cola de ready
+ * Cambia el estado del proceso PID a ready
+ * Imprime la lista de procesos ready
+ * Modificado: V1.11
+ */
 void OperatingSystem_MoveToTheREADYState(int PID) {
-	//Ejercicio 11 - 2
 	if (Heap_add(PID, readyToRunQueue[processTable[PID].queueID],
 	QUEUE_PRIORITY, &numberOfReadyToRunProcesses[processTable[PID].queueID],
 	PROCESSTABLEMAXSIZE) >= 0) {
 		int anterior = processTable[PID].state;
 		processTable[PID].state = READY;
-		OS_Cambio_Estado(PID, anterior, "READY");
+		OperatingSystem_Print_Cambio_Estado(PID, anterior, "READY");
 	}
-	OS_Print_ReadyToRunQueue();
+	OperatingSystem_PrintReadyToRunQueue();
 }
 
 // The STS is responsible of deciding which process to execute when specific events occur.
 // It uses processes priorities to make the decission. Given that the READY queue is ordered
 // depending on processes priority, the STS just selects the process in front of the READY queue
-//int OperatingSystem_ShortTermScheduler() {
-//	
-//	int selectedProcess;
-//
-//	selectedProcess=OperatingSystem_ExtractFromReadyToRun();
-//	
-//	return selectedProcess;
-//}
-//Ejercicio 11 - 3
+/**
+ * Busca el proceso de entre todas las colas ready con mas priodirdad
+ * Modificado: V1.11
+ */
 int OperatingSystem_ShortTermScheduler() {
 	int selectedProcess = NOPROCESS;
 	int i;
@@ -322,7 +331,10 @@ int OperatingSystem_ShortTermScheduler() {
 }
 
 // Return PID of more priority process in the READY queue
-// Ejercicio 11 - 4
+/**
+ * Devuelve el PID con mas prioridad de la cola de readys que le pasas por queueID
+ * Modificado: V1.11
+ */
 int OperatingSystem_ExtractFromReadyToRun(int queueID) {
 	int selectedProcess = NOPROCESS;
 	//selectedProcess=Heap_poll(readyToRunQueue,QUEUE_PRIORITY ,&numberOfReadyToRunProcesses);
@@ -333,6 +345,10 @@ int OperatingSystem_ExtractFromReadyToRun(int queueID) {
 }
 
 // Function that assigns the processor to a process
+/**
+ * Dado un PID, lo pone en ejecutando
+ * Modificado: (Escribir que se ha modificado)
+ */
 void OperatingSystem_Dispatch(int PID) {
 
 	// The process identified by PID becomes the current executing process
@@ -340,12 +356,17 @@ void OperatingSystem_Dispatch(int PID) {
 	// Change the process' state
 	int anterior = processTable[PID].state;
 	processTable[PID].state = EXECUTING;
-	OS_Cambio_Estado(executingProcessID, anterior, "EXECUTING");
+	OperatingSystem_Print_Cambio_Estado(executingProcessID, anterior,
+			"EXECUTING");
 	// Modify hardware registers with appropriate values for the process identified by PID
 	OperatingSystem_RestoreContext(PID);
 }
 
 // Modify hardware registers with appropriate values for the process identified by PID
+/**
+ * Modificar los registros de hardware con valores apropiados para el proceso identificado por PID
+ * Modificado: NO
+ */
 void OperatingSystem_RestoreContext(int PID) {
 
 	// New values for the CPU registers are obtained from the PCB
@@ -360,7 +381,10 @@ void OperatingSystem_RestoreContext(int PID) {
 }
 
 // Function invoked when the executing process leaves the CPU 
-// Ejercicio 12
+/**
+ * Guarda el estado del proceso en ejecucion y lo pasa a estado Ready
+ * Modificado: V1.12
+ */
 void OperatingSystem_PreemptRunningProcess() {
 	// Save in the process' PCB essential values stored in hardware registers and the system stack
 	OperatingSystem_SaveContext(executingProcessID);
@@ -371,7 +395,10 @@ void OperatingSystem_PreemptRunningProcess() {
 }
 
 // Save in the process' PCB essential values stored in hardware registers and the system stack
-// Ejercicio 13
+/**
+ * Guarda el estado del proceso PID
+ * Modificado: V1.13
+ */
 void OperatingSystem_SaveContext(int PID) {
 
 	// Load PC saved for interrupt manager
@@ -399,7 +426,7 @@ void OperatingSystem_TerminateProcess() {
 	int selectedProcess;
 	int anterior = processTable[executingProcessID].state;
 	processTable[executingProcessID].state = EXIT;
-	OS_Cambio_Estado(executingProcessID, anterior, "EXIT");
+	OperatingSystem_Print_Cambio_Estado(executingProcessID, anterior, "EXIT");
 
 	if (programList[processTable[executingProcessID].programListIndex]->type
 			== USERPROGRAM)
@@ -417,6 +444,10 @@ void OperatingSystem_TerminateProcess() {
 }
 
 // System call management routine
+/**
+ * Maneja las llamadas al sistema
+ * Modificado: v2.5
+ */
 void OperatingSystem_HandleSystemCall() {
 
 	int systemCallID;
@@ -439,11 +470,12 @@ void OperatingSystem_HandleSystemCall() {
 		break;
 
 	case SYSCALL_YIELD:
-		OS_TransferWithEcualPriority();
+		OperatingSystem_TransferWithEcualPriority();
 		break;
-		//Ejercicio 5
+
 	case SYSCALL_SLEEP:
-		OS_MoveToTheSleepingProcessesQueue();
+		//Ejercicio 5
+		OperatingSystem_Dormir_Proceso_Actual();
 		break;
 
 	}
@@ -459,15 +491,76 @@ void OperatingSystem_InterruptLogic(int entryPoint) {
 		OperatingSystem_HandleException();
 		break;
 	case CLOCKINT_BIT: // CLOCKINT_BIT=9
-		OS_HandleClockInterrupt();
+		OperatingSystem_HandleClockInterrupt();
 		break;
 
 	}
 }
 
-//Ejercicio 12
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+void Test(char const *cadena, int numero) {
+#define ANSI_COLOR_BLUE "\x1b[34m"
+#define ANSI_COLOR_RESET "\x1b[0m"
+	char chr;
+	printf(ANSI_COLOR_BLUE);
+	printf("\t%s %d >>", cadena, numero);
+	printf(ANSI_COLOR_RESET);
+	scanf("%c", &chr);
+}
+
+/**
+ * Imprime la lista de procesos listos
+ * Modificado: V1.11
+ */
+void OperatingSystem_PrintReadyToRunQueue() {
+
+	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
+
+	int i = 0;
+	int j = 0;
+	for (j = 0; j < 2; j++) {
+		ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[j]);
+		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
+			int identificador = readyToRunQueue[j][i];
+			int prioridad = processTable[identificador].priority;
+			if (i == 0) {
+				ComputerSystem_DebugMessage(113, SHORTTERMSCHEDULE,
+						identificador, prioridad);
+			} else {
+				ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE,
+						identificador, prioridad);
+			}
+		}
+		ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
+	}
+
+}
+
+/**
+ * Imprime el cambio de estado de un proceso
+ */
+void OperatingSystem_Print_Cambio_Estado(int ID, int anterior,
+		char const *posterior) {
+	ComputerSystem_DebugMessage(110, SYSPROC, ID,
+			programList[processTable[ID].programListIndex]->executableName,
+			statesNames[anterior], posterior);
+}
+
 // Process [1 – progName1] will transfer the control of the processor to process [3 – progName2]
-void OS_TransferWithEcualPriority() {
+/**
+ * Cambia el proceso en ejecucion a uno con la misma prioridad
+ * Modificado: V1.12
+ */
+void OperatingSystem_TransferWithEcualPriority() {
 	int IDActual = executingProcessID;
 	int priority = processTable[executingProcessID].priority;
 	//Localizar proceso para cambiar:
@@ -498,94 +591,16 @@ void OS_TransferWithEcualPriority() {
 	//Dar el procesador al siguiente proceso:
 	OperatingSystem_Dispatch(indexMasAlta);
 
-	OS_Print_ReadyToRunQueue();
-	OperatingSystem_ExtractFromReadyToRun(IDActual); //TODO Ver si saca bien de la cola
-	OS_Print_ReadyToRunQueue();
-	Test("Test ", 51);
-}
-
-void OS_TransferWithoutEcualPriority() {
-	int IDActual = executingProcessID;
-	//Localizar proceso para cambiar:
-	int indexMasAlta = -1;
-	int j = 0;
-	int i = 0;
-	for (j = 0; j < 2; j++) {
-		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
-			int identificador = readyToRunQueue[j][i];
-			if (processTable[identificador].priority
-					> processTable[indexMasAlta].priority) {
-				indexMasAlta = identificador;
-			}
-		}
-	}
-	if (indexMasAlta == -1) {
-		return;
-	}
-	//Imprimir el cambio:
-	char *nameMasAlta =
-			programList[processTable[indexMasAlta].programListIndex]->executableName;
-	char *name =
-			programList[processTable[executingProcessID].programListIndex]->executableName;
-	ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, executingProcessID,
-			name, indexMasAlta, nameMasAlta);
-	//Quitar el procesador al proceso actual:
-	OperatingSystem_PreemptRunningProcess();
-	//Dar el procesador al siguiente proceso:
-	OperatingSystem_Dispatch(indexMasAlta);
-
-	OS_Print_ReadyToRunQueue();
-	OperatingSystem_ExtractFromReadyToRun(IDActual); //TODO Ver si saca bien de la cola
-	OS_Print_ReadyToRunQueue();
-	Test("Test ", 51);
-}
-
-
-
-
-
-//Ejercicio 11 - 5
-void OS_Print_ReadyToRunQueue() {
-	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
-
-	int i = 0;
-	int j = 0;
-	for (j = 0; j < 2; j++) {
-		ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[j]);
-		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
-			int identificador = readyToRunQueue[j][i];
-			int prioridad = processTable[identificador].priority;
-			if (i == 0) {
-				ComputerSystem_DebugMessage(113, SHORTTERMSCHEDULE,
-						identificador, prioridad);
-			} else {
-				ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE,
-						identificador, prioridad);
-			}
-		}
-		ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
-	}
+	//Sacar de la readyToRun al proceso actual
+	OperatingSystem_ExtractFromReadyToRun(IDActual);
 
 }
 
-void OS_Cambio_Estado(int ID, int anterior, char const *posterior) {
-	ComputerSystem_DebugMessage(110, SYSPROC, ID,
-			programList[processTable[ID].programListIndex]->executableName,
-			statesNames[anterior], posterior);
-
-}
-
-// In OperatingSystem.c Exercise 2-b of V2
-// Ejercicio 2 - Pega el código de debajo en el fichero indicado en el
-// comentario correspondiente y añade la función prototipo donde sea necesario.
-// Ejercicio 4 - Modifica la rutina OperatingSystem_HandleClockInterrupt() para
-// que cuente el número total de interrupciones de reloj ocurridas
-// (en la variable numberOfClockInterrupts) y muestre un mensaje en pantalla
-// con el aspecto siguiente (número de mensaje 120, sección INTERRUPT, y color Cyan).
-// Para el tiempo, usad la función OperatingSystem_ShowTime(INTERRUPT)
-
-void OS_HandleClockInterrupt() {
-	//TODO Ejercicio 1 ?
+/**
+ * Imprime y aumenta el numero de interrupciones
+ * Modificado: V2.4
+ */
+void OperatingSystem_HandleClockInterrupt() {
 	//OperatingSystem_ShowTime(INTERRUPT);
 	ComputerSystem_DebugMessage(120, INTERRUPT, numberOfClockInterrupts);
 	numberOfClockInterrupts = numberOfClockInterrupts + 1;
@@ -595,65 +610,70 @@ void OS_HandleClockInterrupt() {
 	return;
 }
 
+/**
+ * Mueve el proceso actual a la cola de dormidos
+ * Modificado: V2.5
+ */
+void OperatingSystem_Dormir_Proceso_Actual() {
+	//Calcular el whenToWakeUp
+	processTable[executingProcessID].whenToWakeUp = OperatingSystem_GetWhenToWakeUp();
+	// Guardar el estado del proceso
+	OperatingSystem_SaveContext(executingProcessID);
+	// Añadir el proceso a la sleepingProcessesQueue
+	OperatingSystem_MoveToTheSleepingProcessesQueue(executingProcessID);
+	// Select the next process to execute (sipID if no more user processes)
+	int selectedProcess = OperatingSystem_ShortTermScheduler();
+	// Assign the processor to that process
+	OperatingSystem_Dispatch(selectedProcess);
+}
+
+int OperatingSystem_GetWhenToWakeUp(){
+	int acumulador = Processor_GetAccumulator(); // valor actual del registro acumulador
+	if (acumulador < 0)
+		acumulador = 0 - acumulador;
+	int whenToWakeUp = acumulador + numberOfClockInterrupts + 1;
+	return whenToWakeUp;
+}
+
+
+/**
+ * Añade el proceso PID a la cola de dormidos
+ * Cambia el estado del proceso PID a dormido
+ * Modificado: V2.5
+ */
+void OperatingSystem_MoveToTheSleepingProcessesQueue(int PID) {
+	if (Heap_add(PID, sleepingProcessesQueue, processTable[PID].whenToWakeUp,
+			&numberOfSleepingProcesses, PROCESSTABLEMAXSIZE) >= 0) {
+		int anterior = processTable[PID].state;
+		processTable[PID].state = BLOCKED;
+		OperatingSystem_Print_Cambio_Estado(PID, anterior, "BLOCKED");
+	}
+}
+
+/**
+ * Comprueba que haya un proceso a despertar y lo despierta
+ */
+void OperatingSystem_WakeUpProcesses() {
 // TODO Ejercicio 6: Si el campo whenToWakeUp de un proceso (o más de uno) de la cola
 //sleepingProcessesQueue coincide con el número de interrupciones de reloj
 //ocurridas hasta el momento, el proceso se desbloqueará, pasando al estado READY
 //y siendo eliminado de la sleepingProcessesQueue.
-void OS_WakeUpProcesses() {
 	int i = 0;
 	for (i = 0; i < numberOfSleepingProcesses; i++) {
 		int identificador = sleepingProcessesQueue[i];
 		if (processTable[identificador].whenToWakeUp
 				<= numberOfClockInterrupts) {
-
-			OperatingSystem_PrintSleepingProcessQueue();
-			Test("Test", 61);
-			OS_ExtractFromSleepingQueue(identificador);
-			OperatingSystem_PrintSleepingProcessQueue();
-			//TODO Ejercicio 6 Pasar a estado listo
-			Test("Test", 62);
-			OS_Print_ReadyToRunQueue();
-			Test("Test", 63);
+			OperatingSystem_ExtractFromSleepingQueue(identificador);
 			OperatingSystem_MoveToTheREADYState(identificador);
-			Test("Test", 64);
-			OS_Print_ReadyToRunQueue();
-			Test("Test", 65);
 		}
 	}
 }
 
-void OS_MoveToTheSleepingProcessesQueue() {
-	//TODO Ejercicio 5
-	int PID = executingProcessID;
-	int acumulador = Processor_GetAccumulator(); // Ejercicio 5 - valor actual del registro acumulador => registerAccumulator_CPU
-	if (acumulador < 0)
-		acumulador = 0 - acumulador;
-	int whenToWakeUp = acumulador + numberOfClockInterrupts + 1;
-	processTable[PID].whenToWakeUp = whenToWakeUp;
-
-	if (Heap_add(PID, sleepingProcessesQueue, processTable[PID].whenToWakeUp,
-			&numberOfSleepingProcesses, PROCESSTABLEMAXSIZE) >= 0) {
-		int anterior = processTable[PID].state;
-		processTable[PID].state = BLOCKED;
-		OS_Cambio_Estado(PID, anterior, "BLOCKED");
-		OS_TransferWithoutEcualPriority();
-		OperatingSystem_PrintStatus();
-	}
-}
 //Ejercicio 6: Saca el elemento queueID de la cola de dormidos
-int OS_ExtractFromSleepingQueue(int queueID) {
+int OperatingSystem_ExtractFromSleepingQueue(int queueID) {
 	int selectedProcess = NOPROCESS;
 	selectedProcess = Heap_poll(sleepingProcessesQueue, QUEUE_WAKEUP,
 			&numberOfSleepingProcesses);
 	return selectedProcess;
 }
 
-void Test(char const *cadena, int numero) {
-#define ANSI_COLOR_BLUE "\x1b[34m"
-#define ANSI_COLOR_RESET "\x1b[0m"
-	char chr;
-	printf(ANSI_COLOR_BLUE);
-	printf("\t%s %d >>", cadena, numero);
-	printf(ANSI_COLOR_RESET);
-	scanf("%c", &chr);
-}

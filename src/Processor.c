@@ -54,7 +54,6 @@ void Processor_InstructionCycleLoop() {
 
 	while (!Processor_PSW_BitState(POWEROFF_BIT)) {
 
-		//TODO Ejercicio 1
 		//OperatingSystem_ShowTime(Clock_GetTime());
 
 		if (Processor_FetchInstruction()==CPU_SUCCESS)
