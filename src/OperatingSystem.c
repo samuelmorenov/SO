@@ -37,7 +37,7 @@ int OperatingSystem_ExtractFromSleepingQueue(int queueID);
 void OperatingSystem_Dormir_Proceso_Actual();
 int OperatingSystem_GetWhenToWakeUp();
 void OperatingSystem_CambiarProcesoAlMasPrioritario();
-void Test(char const *cadena, int numero);
+//void Test(char const *cadena, int numero);
 
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
@@ -513,15 +513,15 @@ void OperatingSystem_InterruptLogic(int entryPoint) {
 	}
 }
 
-void Test(char const *cadena, int numero) {
-#define ANSI_COLOR_BLUE "\x1b[34m"
-#define ANSI_COLOR_RESET "\x1b[0m"
-	char chr;
-	printf(ANSI_COLOR_BLUE);
-	printf("\t%s %d >>", cadena, numero);
-	printf(ANSI_COLOR_RESET);
-	scanf("%c", &chr);
-}
+//void Test(char const *cadena, int numero) {
+//#define ANSI_COLOR_BLUE "\x1b[34m"
+//#define ANSI_COLOR_RESET "\x1b[0m"
+//	char chr;
+//	printf(ANSI_COLOR_BLUE);
+//	printf("\t%s %d >>", cadena, numero);
+//	printf(ANSI_COLOR_RESET);
+//	scanf("%c", &chr);
+//}
 
 /**
  * Imprime la lista de procesos listos

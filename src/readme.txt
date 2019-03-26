@@ -1,0 +1,1 @@
+He realizado los ejercicios del 1 al 8 de la V2 completos.
