@@ -497,16 +497,6 @@ void OperatingSystem_InterruptLogic(int entryPoint) {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
 void Test(char const *cadena, int numero) {
 #define ANSI_COLOR_BLUE "\x1b[34m"
 #define ANSI_COLOR_RESET "\x1b[0m"
@@ -598,15 +588,14 @@ void OperatingSystem_TransferWithEcualPriority() {
 
 /**
  * Imprime y aumenta el numero de interrupciones
- * Modificado: V2.4
+ * Modificado: V2.6
  */
 void OperatingSystem_HandleClockInterrupt() {
 	//OperatingSystem_ShowTime(INTERRUPT);
 	ComputerSystem_DebugMessage(120, INTERRUPT, numberOfClockInterrupts);
 	numberOfClockInterrupts = numberOfClockInterrupts + 1;
 
-	//TODO Ejercicio 6
-	//OperatingSystem_WakeUpProcesses();
+	OperatingSystem_WakeUpProcesses();
 	return;
 }
 
@@ -616,7 +605,8 @@ void OperatingSystem_HandleClockInterrupt() {
  */
 void OperatingSystem_Dormir_Proceso_Actual() {
 	//Calcular el whenToWakeUp
-	processTable[executingProcessID].whenToWakeUp = OperatingSystem_GetWhenToWakeUp();
+	processTable[executingProcessID].whenToWakeUp =
+			OperatingSystem_GetWhenToWakeUp();
 	// Guardar el estado del proceso
 	OperatingSystem_SaveContext(executingProcessID);
 	// Añadir el proceso a la sleepingProcessesQueue
@@ -627,14 +617,13 @@ void OperatingSystem_Dormir_Proceso_Actual() {
 	OperatingSystem_Dispatch(selectedProcess);
 }
 
-int OperatingSystem_GetWhenToWakeUp(){
+int OperatingSystem_GetWhenToWakeUp() {
 	int acumulador = Processor_GetAccumulator(); // valor actual del registro acumulador
 	if (acumulador < 0)
 		acumulador = 0 - acumulador;
 	int whenToWakeUp = acumulador + numberOfClockInterrupts + 1;
 	return whenToWakeUp;
 }
-
 
 /**
  * Añade el proceso PID a la cola de dormidos
@@ -652,24 +641,35 @@ void OperatingSystem_MoveToTheSleepingProcessesQueue(int PID) {
 
 /**
  * Comprueba que haya un proceso a despertar y lo despierta
+ * Modificado: V2.6
  */
 void OperatingSystem_WakeUpProcesses() {
-// TODO Ejercicio 6: Si el campo whenToWakeUp de un proceso (o más de uno) de la cola
-//sleepingProcessesQueue coincide con el número de interrupciones de reloj
-//ocurridas hasta el momento, el proceso se desbloqueará, pasando al estado READY
-//y siendo eliminado de la sleepingProcessesQueue.
 	int i = 0;
+	int procesosDespertados = 0;
 	for (i = 0; i < numberOfSleepingProcesses; i++) {
 		int identificador = sleepingProcessesQueue[i];
 		if (processTable[identificador].whenToWakeUp
 				<= numberOfClockInterrupts) {
+			/* Si el campo whenToWakeUp de un proceso (o más de uno) de la cola
+			 * sleepingProcessesQueue coincide con el número de interrupciones de
+			 * reloj ocurridas hasta el momento:
+			 */
+			//Despertar proceso:
 			OperatingSystem_ExtractFromSleepingQueue(identificador);
+			//Pasar a estado ready
 			OperatingSystem_MoveToTheREADYState(identificador);
+			procesosDespertados++;
 		}
+	}
+	if (procesosDespertados > 0) {
+		OperatingSystem_PrintStatus();
 	}
 }
 
-//Ejercicio 6: Saca el elemento queueID de la cola de dormidos
+/**
+ * Saca el elemento queueID de la cola de dormidos
+ * Modificado: V2.6
+ */
 int OperatingSystem_ExtractFromSleepingQueue(int queueID) {
 	int selectedProcess = NOPROCESS;
 	selectedProcess = Heap_poll(sleepingProcessesQueue, QUEUE_WAKEUP,
