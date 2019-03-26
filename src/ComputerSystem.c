@@ -6,6 +6,7 @@
 #include "Processor.h"
 #include "Messages.h"
 #include "Asserts.h"
+#include "Clock.h"
 
 // Functions prototypes
 
@@ -31,6 +32,8 @@ void ComputerSystem_PowerOn(int argc, char *argv[]) {
 	ComputerSystem_PrintProgramList();
 
 	int na=Asserts_LoadAsserts();
+	//OperatingSystem_ShowTime(POWERON);
+	ComputerSystem_DebugMessage(Processor_PSW_BitState(EXECUTION_MODE_BIT)?5:4,POWERON,Clock_GetTime());
 	if (na==-1)
 		// printf("Asserts file unavailable\n");
 		ComputerSystem_DebugMessage(84,POWERON);
@@ -50,6 +53,8 @@ void ComputerSystem_PowerOn(int argc, char *argv[]) {
 // Powers off the CS (the C program ends)
 void ComputerSystem_PowerOff() {
 	// Show message in red colour: "END of the simulation\n" 
+	//OperatingSystem_ShowTime(SHUTDOWN);
+	ComputerSystem_DebugMessage(Processor_PSW_BitState(EXECUTION_MODE_BIT)?5:4,SHUTDOWN,Clock_GetTime());
 	ComputerSystem_DebugMessage(99,SHUTDOWN); 
 	exit(0);
 }
@@ -62,6 +67,8 @@ Implementa una función ComputerSystem_PrintProgramList() que muestre en pantalla
 los programas de usuario contenidos en el vector programsList.*/
 void ComputerSystem_PrintProgramList() {
 	int i;
+	//OperatingSystem_ShowTime(INIT);
+	ComputerSystem_DebugMessage(Processor_PSW_BitState(EXECUTION_MODE_BIT)?5:4,INIT,Clock_GetTime());
 	ComputerSystem_DebugMessage(101, INIT);
 	for (i = 1; i < PROGRAMSMAXNUMBER; i++) {
 		if (programList[i] != NULL) {

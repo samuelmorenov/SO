@@ -17,18 +17,19 @@
 105,@RERROR: Program [%s] is too big@@\n
 
 //Ejercicio 9
-106,Ready-to-run processes queue:\n
-107,\t[@G%d@@,%d]
+106,Ready-to-run processes queue:\n\t\t
+107,[@G%d@@,%d]
 108,, [@G%d@@,%d]
-109,\n
+109,\n\t\t
 
 //Ejercicio 10
 110,Process [@G%d - %s@@] moving from the [@G%s@@] state to the [@G%s@@] state\n
 111,New process [@G%s@@] moving to the [@GNEW@@] state\n
 
 //Ejercicio 11
-112,\t%s: 
+112,%s: 
 113,[@G%d@@,%d]
+114,\n
 
 //Ejercicio 12
 115,Process [@G%d - %s@@] will transfer the control of the processor to process [@G%d - %s@@]\n

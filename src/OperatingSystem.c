@@ -121,6 +121,7 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 			programList[processTable[sipID].programListIndex]->executableName,
 			"SystemIdleProcess")) {
 		// Show message "ERROR: Missing SIP program!\n"
+		OperatingSystem_ShowTime(SHUTDOWN);
 		ComputerSystem_DebugMessage(21, SHUTDOWN);
 		exit(1);
 	}
@@ -173,6 +174,7 @@ int OperatingSystem_LongTermScheduler() {
 	for (i = 0; programList[i] != NULL && i < PROGRAMSMAXNUMBER; i++) {
 		PID = OperatingSystem_CreateProcess(i);
 		char *name = programList[i]->executableName;
+		OperatingSystem_ShowTime(INIT);
 		switch (PID) {
 		case NOFREEENTRY:
 			ComputerSystem_DebugMessage(103, INIT, name);
@@ -245,6 +247,7 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	OperatingSystem_PCBInitialization(PID, loadingPhysicalAddress, processSize,
 			priority, indexOfExecutableProgram);
 	// Show message "Process [PID] created from program [executableName]\n"
+	OperatingSystem_ShowTime(INIT);
 	ComputerSystem_DebugMessage(22, INIT, PID,
 			executableProgram->executableName);
 
@@ -293,6 +296,7 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress,
 		processTable[PID].copyOfPSWRegister = 0;
 	}
 	//New process [SystemIdleProcess] moving to the [NEW] state
+	OperatingSystem_ShowTime(SYSPROC);
 	ComputerSystem_DebugMessage(111, SYSPROC,
 			programList[processTable[PID].programListIndex]->executableName);
 }
@@ -422,6 +426,7 @@ void OperatingSystem_SaveContext(int PID) {
 void OperatingSystem_HandleException() {
 
 	// Show message "Process [executingProcessID] has generated an exception and is terminating\n"
+	OperatingSystem_ShowTime(SYSPROC);
 	ComputerSystem_DebugMessage(23, SYSPROC, executingProcessID,
 			programList[processTable[executingProcessID].programListIndex]->executableName);
 
@@ -467,12 +472,14 @@ void OperatingSystem_HandleSystemCall() {
 	switch (systemCallID) {
 	case SYSCALL_PRINTEXECPID:
 		// Show message: "Process [executingProcessID] has the processor assigned\n"
+		OperatingSystem_ShowTime(SYSPROC);
 		ComputerSystem_DebugMessage(24, SYSPROC, executingProcessID,
 				programList[processTable[executingProcessID].programListIndex]->executableName);
 		break;
 
 	case SYSCALL_END:
 		// Show message: "Process [executingProcessID] has requested to terminate\n"
+		OperatingSystem_ShowTime(SYSPROC);
 		ComputerSystem_DebugMessage(25, SYSPROC, executingProcessID,
 				programList[processTable[executingProcessID].programListIndex]->executableName);
 		OperatingSystem_TerminateProcess();
@@ -525,24 +532,41 @@ void OperatingSystem_PrintReadyToRunQueue() {
 	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
 	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
 
-	int i = 0;
-	int j = 0;
-	for (j = 0; j < 2; j++) {
-		ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[j]);
-		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
-			int identificador = readyToRunQueue[j][i];
-			int prioridad = processTable[identificador].priority;
-			if (i == 0) {
-				ComputerSystem_DebugMessage(113, SHORTTERMSCHEDULE,
-						identificador, prioridad);
-			} else {
-				ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE,
-						identificador, prioridad);
-			}
-		}
-		ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
-	}
 
+//	int j = 0;
+//	for (j = 0; j < 2; j++) {
+//		ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[j]);
+//		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
+//			int identificador = readyToRunQueue[j][i];
+//			int prioridad = processTable[identificador].priority;
+//			if (i == 0) {
+//				ComputerSystem_DebugMessage(113, SHORTTERMSCHEDULE,
+//						identificador, prioridad);
+//			} else {
+//				ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE,
+//						identificador, prioridad);
+//			}
+//		}
+//		ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
+//	}
+
+	int i = 0;
+	ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[0]);
+	for (i = 0; i < numberOfReadyToRunProcesses[0]; i++) {
+		int identificador = readyToRunQueue[0][i];
+		int prioridad = processTable[identificador].priority;
+		ComputerSystem_DebugMessage(113, SHORTTERMSCHEDULE, identificador,
+				prioridad);
+	}
+	ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
+	ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[1]);
+	for (i = 0; i < numberOfReadyToRunProcesses[1]; i++) {
+		int identificador = readyToRunQueue[1][i];
+		int prioridad = processTable[identificador].priority;
+		ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE, identificador,
+				prioridad);
+	}
+	ComputerSystem_DebugMessage(114, SHORTTERMSCHEDULE);
 }
 
 /**
@@ -550,6 +574,7 @@ void OperatingSystem_PrintReadyToRunQueue() {
  */
 void OperatingSystem_Print_Cambio_Estado(int ID, int anterior,
 		char const *posterior) {
+	OperatingSystem_ShowTime(SYSPROC);
 	ComputerSystem_DebugMessage(110, SYSPROC, ID,
 			programList[processTable[ID].programListIndex]->executableName,
 			statesNames[anterior], posterior);
@@ -584,6 +609,7 @@ void OperatingSystem_TransferWithEcualPriority() {
 			programList[processTable[indexMasAlta].programListIndex]->executableName;
 	char *name =
 			programList[processTable[executingProcessID].programListIndex]->executableName;
+	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
 	ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, executingProcessID,
 			name, indexMasAlta, nameMasAlta);
 	//Quitar el procesador al proceso actual:
@@ -604,7 +630,7 @@ void OperatingSystem_TransferWithEcualPriority() {
  * Modificado: V2.6
  */
 void OperatingSystem_HandleClockInterrupt() {
-	//OperatingSystem_ShowTime(INTERRUPT);
+	OperatingSystem_ShowTime(INTERRUPT);
 	ComputerSystem_DebugMessage(120, INTERRUPT, numberOfClockInterrupts);
 	numberOfClockInterrupts = numberOfClockInterrupts + 1;
 

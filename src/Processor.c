@@ -54,8 +54,6 @@ void Processor_InstructionCycleLoop() {
 
 	while (!Processor_PSW_BitState(POWEROFF_BIT)) {
 
-		//OperatingSystem_ShowTime(Clock_GetTime());
-
 		if (Processor_FetchInstruction()==CPU_SUCCESS)
 			Processor_DecodeAndExecuteInstruction();
 //		if (interruptLines_CPU)
@@ -81,10 +79,14 @@ int Processor_FetchInstruction() {
 		// Show message: operationCode operand1 operand2
 		char codedInstruction[13]; // Coded instruction with separated fields to show
 		Processor_GetCodedInstruction(codedInstruction,registerIR_CPU);
+		//OperatingSystem_ShowTime(HARDWARE);
+		ComputerSystem_DebugMessage(Processor_PSW_BitState(EXECUTION_MODE_BIT)?5:4,HARDWARE,Clock_GetTime());
 		ComputerSystem_DebugMessage(1, HARDWARE, codedInstruction);
 	}
 	else {
 		// Show message: "_ _ _ "
+		//OperatingSystem_ShowTime(HARDWARE);
+		ComputerSystem_DebugMessage(Processor_PSW_BitState(EXECUTION_MODE_BIT)?5:4,HARDWARE,Clock_GetTime());
 		ComputerSystem_DebugMessage(2,HARDWARE);
 		return CPU_FAIL;
 	}
@@ -242,7 +244,6 @@ void Processor_DecodeAndExecuteInstruction() {
 	
 	// Show final part of HARDWARE message with	CPU registers
 	// Show message: " (PC: registerPC_CPU, Accumulator: registerAccumulator_CPU, PSW: registerPSW_CPU [Processor_ShowPSW()]\n
-
 	ComputerSystem_DebugMessage(3, HARDWARE, operationCode,operand1,operand2,registerPC_CPU,registerAccumulator_CPU,registerPSW_CPU,Processor_ShowPSW());
 }
 	
