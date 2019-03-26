@@ -13,7 +13,7 @@ int OperatingSystem_LoadProgram(FILE *, int, int);
 void OperatingSystem_ReadyToShutdown();
 void OperatingSystem_ShowTime(char);
 void OperatingSystem_PrintStatus();
-void OperatingSystem_PrintReadyToRunQueue();
+void OS_PrintReadyToRunQueue();
 void OperatingSystem_PrepareTeachersDaemons();
 
 extern int sleepingProcessesQueue[PROCESSTABLEMAXSIZE];

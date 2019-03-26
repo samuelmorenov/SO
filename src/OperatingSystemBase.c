@@ -17,9 +17,9 @@ void OperatingSystem_PrintProcessTableAssociation();
 
 extern int executingProcessID;
 #ifdef SLEEPINGQUEUE
-	extern char * queueNames []; 
+	extern char * queueNames [];
 #endif
-	
+
 // Search for a free entry in the process table. The index of the selected entry
 // will be used as the process identifier
 int OperatingSystem_ObtainAnEntryInTheProcessTable() {
@@ -45,7 +45,7 @@ int OperatingSystem_ObtainProgramSize(FILE **programFile, char *program) {
 	char lineRead[MAXLINELENGTH];
 	int isComment=1;
 	int programSize;
-	
+
 	*programFile= fopen(program, "r");
 	
 	// Check if programFile exists
@@ -131,7 +131,7 @@ int OperatingSystem_LoadProgram(FILE *programFile, int initialAddress, int size)
 				  	op2=atoi(token2);
 				}
 			}
-			
+
 			// More instructions than size...
 			if (++nbInstructions > size){
 				return TOOBIGPROCESS;
@@ -154,7 +154,7 @@ int OperatingSystem_LoadProgram(FILE *programFile, int initialAddress, int size)
 // Auxiliar for check that line begins with positive number
 int OperatingSystem_lineBeginsWithANumber(char * line) {
 	int i;
-	
+
 	for (i=0; i<strlen(line) && line[i]==' '; i++); // Don't consider blank spaces
 	// If is there a digit number...
 	if (i<strlen(line) && isdigit(line[i]))
@@ -180,7 +180,7 @@ void OperatingSystem_ShowTime(char section) {
 }
 
 // Show general status
-void OperatingSystem_PrintStatus(){ 
+void OperatingSystem_PrintStatus(){
 	OperatingSystem_PrintExecutingProcessInformation(); // Show executing process information
 	OperatingSystem_PrintReadyToRunQueue();  // Show Ready to run queues implemented for students
 	OperatingSystem_PrintSleepingProcessQueue(); // Show Sleeping process queue
@@ -189,7 +189,7 @@ void OperatingSystem_PrintStatus(){
 }
 
  // Show Executing process information
-void OperatingSystem_PrintExecutingProcessInformation(){ 
+void OperatingSystem_PrintExecutingProcessInformation(){
 #ifdef SLEEPINGQUEUE
 
 	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
@@ -204,8 +204,8 @@ void OperatingSystem_PrintExecutingProcessInformation(){
 #endif
 }
 
-// Show SleepingProcessQueue 
-void OperatingSystem_PrintSleepingProcessQueue(){ 
+// Show SleepingProcessQueue
+void OperatingSystem_PrintSleepingProcessQueue(){
 #ifdef SLEEPINGQUEUE
 
 	int i;
@@ -220,7 +220,7 @@ void OperatingSystem_PrintSleepingProcessQueue(){
 			if (i<numberOfSleepingProcesses-1)
 	  			ComputerSystem_DebugMessage(98,SHORTTERMSCHEDULE,", ");
   		}
-  	else 
+  	else
 	  	ComputerSystem_DebugMessage(98,SHORTTERMSCHEDULE,"[--- empty queue ---]");
   ComputerSystem_DebugMessage(98,SHORTTERMSCHEDULE,"\n");
 
@@ -265,7 +265,7 @@ void OperatingSystem_PrepareTeachersDaemons(){
     	if (arrivalTime==NULL
     		|| sscanf(arrivalTime,"%d",&time)==0)
     		time=0;
-    	
+
     	progData=(PROGRAMS_DATA *) malloc(sizeof(PROGRAMS_DATA));
     	progData->executableName = (char *) malloc((strlen(name)+1)*sizeof(char));
     	strcpy(progData->executableName,name);
