@@ -540,6 +540,10 @@ void OS_TransferWithoutEcualPriority() {
 	Test("Test ", 51);
 }
 
+
+
+
+
 //Ejercicio 11 - 5
 void OS_Print_ReadyToRunQueue() {
 	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
