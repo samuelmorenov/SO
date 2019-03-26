@@ -362,6 +362,8 @@ void OperatingSystem_Dispatch(int PID) {
 			"EXECUTING");
 	// Modify hardware registers with appropriate values for the process identified by PID
 	OperatingSystem_RestoreContext(PID);
+	OperatingSystem_PrintStatus();
+
 }
 
 // Modify hardware registers with appropriate values for the process identified by PID
@@ -725,7 +727,5 @@ void OperatingSystem_CambiarProcesoAlMasPrioritario() {
 
 	//Sacar de la readyToRun al proceso actual
 	OperatingSystem_ExtractFromReadyToRun(IDActual);
-
-	Test("test",0);
 }
 
