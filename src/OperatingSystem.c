@@ -163,7 +163,7 @@ void OperatingSystem_PrepareDaemons(int programListDaemonsBase) {
 // 			command lineand daemons programs
 /**
  * Crea un proceso para cada programa. Da errores en caso de no poder
- * Modificado: V1.11
+ * Modificado: V2.7
  */
 int OperatingSystem_LongTermScheduler() {
 
@@ -196,6 +196,7 @@ int OperatingSystem_LongTermScheduler() {
 				numberOfNotTerminatedUserProcesses++;
 			// Move process to the ready state
 			OperatingSystem_MoveToTheREADYState(PID);
+			OperatingSystem_PrintStatus(); //Ejercicio V2.7
 			break;
 		}
 	}
@@ -411,6 +412,10 @@ void OperatingSystem_SaveContext(int PID) {
 }
 
 // Exception management routine
+/**
+ * Manejador de excepciones
+ * Modificado: V2.7
+ */
 void OperatingSystem_HandleException() {
 
 	// Show message "Process [executingProcessID] has generated an exception and is terminating\n"
@@ -418,6 +423,7 @@ void OperatingSystem_HandleException() {
 			programList[processTable[executingProcessID].programListIndex]->executableName);
 
 	OperatingSystem_TerminateProcess();
+	OperatingSystem_PrintStatus(); //Ejercicio V2.7
 }
 
 // All tasks regarding the removal of the process
@@ -467,6 +473,7 @@ void OperatingSystem_HandleSystemCall() {
 		ComputerSystem_DebugMessage(25, SYSPROC, executingProcessID,
 				programList[processTable[executingProcessID].programListIndex]->executableName);
 		OperatingSystem_TerminateProcess();
+		OperatingSystem_PrintStatus(); //Ejercicio V2.7
 		break;
 
 	case SYSCALL_YIELD:
@@ -493,7 +500,6 @@ void OperatingSystem_InterruptLogic(int entryPoint) {
 	case CLOCKINT_BIT: // CLOCKINT_BIT=9
 		OperatingSystem_HandleClockInterrupt();
 		break;
-
 	}
 }
 
@@ -548,7 +554,7 @@ void OperatingSystem_Print_Cambio_Estado(int ID, int anterior,
 // Process [1 – progName1] will transfer the control of the processor to process [3 – progName2]
 /**
  * Cambia el proceso en ejecucion a uno con la misma prioridad
- * Modificado: V1.12
+ * Modificado: V2.7
  */
 void OperatingSystem_TransferWithEcualPriority() {
 	int IDActual = executingProcessID;
@@ -583,6 +589,10 @@ void OperatingSystem_TransferWithEcualPriority() {
 
 	//Sacar de la readyToRun al proceso actual
 	OperatingSystem_ExtractFromReadyToRun(IDActual);
+
+	//Ejercicio V2.7
+	OperatingSystem_PrintStatus();
+
 
 }
 
