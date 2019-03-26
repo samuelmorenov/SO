@@ -313,7 +313,7 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 		processTable[PID].state = READY;
 		OperatingSystem_Print_Cambio_Estado(PID, anterior, "READY");
 	}
-	OperatingSystem_PrintReadyToRunQueue();
+	//OperatingSystem_PrintReadyToRunQueue(); //Comentado en el ejercicio V2.8
 }
 
 // The STS is responsible of deciding which process to execute when specific events occur.
