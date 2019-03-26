@@ -36,6 +36,7 @@ void OperatingSystem_WakeUpProcesses();
 int OperatingSystem_ExtractFromSleepingQueue(int queueID);
 void OperatingSystem_Dormir_Proceso_Actual();
 int OperatingSystem_GetWhenToWakeUp();
+void OperatingSystem_CambiarProcesoAlMasPrioritario();
 void Test(char const *cadena, int numero);
 
 // The process table
@@ -593,7 +594,6 @@ void OperatingSystem_TransferWithEcualPriority() {
 	//Ejercicio V2.7
 	OperatingSystem_PrintStatus();
 
-
 }
 
 /**
@@ -673,6 +673,7 @@ void OperatingSystem_WakeUpProcesses() {
 	}
 	if (procesosDespertados > 0) {
 		OperatingSystem_PrintStatus();
+		OperatingSystem_CambiarProcesoAlMasPrioritario();
 	}
 }
 
@@ -685,5 +686,46 @@ int OperatingSystem_ExtractFromSleepingQueue(int queueID) {
 	selectedProcess = Heap_poll(sleepingProcessesQueue, QUEUE_WAKEUP,
 			&numberOfSleepingProcesses);
 	return selectedProcess;
+}
+
+/**
+ * Cambia el proceso en ejecucion por el que tenga la prioridad mas alta
+ * Modificado: V2.6
+ */
+void OperatingSystem_CambiarProcesoAlMasPrioritario() {
+	int IDActual = executingProcessID;
+	int prioridadActual = processTable[executingProcessID].priority;
+	//Localizar proceso para cambiar:
+	int indexMasAlta = -1;
+	int prioridadMasAlta = -1;
+	int i = 0;
+	for (i = 0; i < numberOfReadyToRunProcesses[0]; i++) {
+		int identificador = readyToRunQueue[0][i];
+		int prioridadAux = processTable[identificador].priority;
+		if (prioridadAux > indexMasAlta) {
+			indexMasAlta = identificador;
+			prioridadMasAlta = prioridadAux;
+		}
+	}
+	if (prioridadMasAlta <= prioridadActual) {
+		return;
+	}
+	//Imprimir el cambio:
+	char *nameMasAlta =
+			programList[processTable[indexMasAlta].programListIndex]->executableName;
+	char *name =
+			programList[processTable[executingProcessID].programListIndex]->executableName;
+	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
+	ComputerSystem_DebugMessage(121, SHORTTERMSCHEDULE, executingProcessID,
+			name, indexMasAlta, nameMasAlta);
+	//Quitar el procesador al proceso actual:
+	OperatingSystem_PreemptRunningProcess();
+	//Dar el procesador al siguiente proceso:
+	OperatingSystem_Dispatch(indexMasAlta);
+
+	//Sacar de la readyToRun al proceso actual
+	OperatingSystem_ExtractFromReadyToRun(IDActual);
+
+	Test("test",0);
 }
 

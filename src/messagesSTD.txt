@@ -36,3 +36,6 @@
 //Ejercicio 4
 120,@CClock interrupt number [%d] has ocurred\n@@
 
+//Ejercicio 6
+121,Process [@G%d - %s@@] is thrown out of the processor by process [@G%d - %s@@]
+
