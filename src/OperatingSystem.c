@@ -522,6 +522,7 @@ void Test(char const *cadena, int numero) {
  */
 void OperatingSystem_PrintReadyToRunQueue() {
 
+	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
 	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
 
 	int i = 0;
