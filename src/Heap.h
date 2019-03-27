@@ -33,4 +33,7 @@ int Heap_compare(int, int, int); //
 
 int Heap_getFirst(int[], int);
 
+//Ejercicio V3.0
+#define ARRIVALQUEUE
+
 #endif

@@ -14,6 +14,10 @@
 // and all user programs specified in the command line
 PROGRAMS_DATA *programList[PROGRAMSMAXNUMBER];
 
+//Ejercicio V3.0
+int arrivalTimeQueue[PROGRAMSMAXNUMBER];
+int numberOfProgramsInArrivalTimeQueue=0;
+
 // Powers on of the Computer System.
 void ComputerSystem_PowerOn(int argc, char *argv[]) {
 
