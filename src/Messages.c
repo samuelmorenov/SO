@@ -19,7 +19,7 @@ int Messages_Load_Messages(int position, char * nameFileMessage) {
 	mf=fopen(nameFileMessage, "r");
 	if (mf==NULL) {
 	   // printf("Verbose messages unavailable\n");
-	   ComputerSystem_DebugMessage(82,POWERON,nameFileMessage);
+	   ComputerSystem_DebugMessage(62,POWERON,nameFileMessage);
 	   return -1;
 	  }
 	   
@@ -30,14 +30,14 @@ int Messages_Load_Messages(int position, char * nameFileMessage) {
   		rc=sscanf(number,"%d",&msgNumber);
     	if (rc==0){
 				// printf("Illegal Message Number in line %d of file %s\n",lineNumber,nameFileMessage);
-				ComputerSystem_DebugMessage(80,POWERON,lineNumber,nameFileMessage);
+				ComputerSystem_DebugMessage(60,POWERON,lineNumber,nameFileMessage);
 				continue;
 			}
 	
 			text=strtok(NULL,"\n");
   		if (text==NULL){
 				// printf("Illegal Message Format in line %d of file %s\n",lineNumber,nameFileMessage);
-				ComputerSystem_DebugMessage(81,POWERON,lineNumber,nameFileMessage);
+				ComputerSystem_DebugMessage(61,POWERON,lineNumber,nameFileMessage);
 				continue;
 			}
 
@@ -52,7 +52,7 @@ int Messages_Load_Messages(int position, char * nameFileMessage) {
 int Messages_Get_Pos(int number) {
 	int pos;
 
-	for (pos=0; DebugMessages[pos].number !=-1; pos++)
+	for (pos=0; (DebugMessages[pos].number !=-1) && (pos < NUMBEROFMSGS); pos++)
  		if (DebugMessages[pos].number==number)
  			return pos;
 

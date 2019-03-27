@@ -12,6 +12,8 @@
 // Functions prototypes
 
 int GEN_ASSERTS=0;
+int LOAD_ASSERTS_CONF=0;
+
 // String specified in the command line to tell the simulator which of its
 // sections are interesting for the user so it must show debug messages
 // related to them
@@ -21,6 +23,11 @@ int endSimulationTime=-1; // For end simulation forced by time
 
 // Only one colour messages. Set to 1 for more colours checking uppercase in debugLevel
 int COLOURED = 0 ;
+
+#ifdef ARRIVALQUEUE
+	extern char * queueNames []; 
+#endif
+
   
 // Fill in the array named userProgramsList with the information given
 // by the user in the command line
@@ -50,6 +57,9 @@ int ComputerSystem_ObtainProgramList(int argc, char *argv[]) {
 
 	if (strchr(debugLevel,'g')) // Generate asserts in standard output
 		GEN_ASSERTS=1; 
+
+	if (strchr(debugLevel,'z')) // Load assert information from configuration file "asserts.conf"
+		LOAD_ASSERTS_CONF=1;
 	
 	// Store the names of the programs
 	for (i = paramIndex; i < argc && count<PROGRAMSMAXNUMBER;) { // check number of programs < PROGRAMSMAXNUMBER
@@ -199,3 +209,36 @@ void ComputerSystem_DebugMessage(int msgNo, char section, ...) {
 	if (COLOURED && colour)
 	    printf("%c[%dm", 0x1B, 0);
 } // ComputerSystem_DebugMessage()
+
+// Fill ArrivalTimeQueue heap with user program from parameters and daemons 
+void ComputerSystem_FillInArrivalTimeQueue() {
+#ifdef ARRIVALQUEUE
+
+  int arrivalIndex = 0; 
+
+	while (programList[arrivalIndex]!=NULL && arrivalIndex<PROGRAMSMAXNUMBER) {
+	  Heap_add(arrivalIndex,arrivalTimeQueue,QUEUE_ARRIVAL,&arrivalIndex,PROGRAMSMAXNUMBER);
+	}
+	numberOfProgramsInArrivalTimeQueue=arrivalIndex;
+#endif
+}
+
+// Print arrivalTiemQueue program information
+void ComputerSystem_PrintArrivalTimeQueue(){
+#ifdef ARRIVALQUEUE
+  int i;
+  
+  if (numberOfProgramsInArrivalTimeQueue>0) {
+	OperatingSystem_ShowTime(LONGTERMSCHEDULE);
+	// Show message "Arrival Time Queue: "
+	ComputerSystem_DebugMessage(31,LONGTERMSCHEDULE);
+	for (i=0; i< numberOfProgramsInArrivalTimeQueue; i++) {
+	  // Show message [executableName,arrivalTime]
+	  ComputerSystem_DebugMessage(32,LONGTERMSCHEDULE,programList[arrivalTimeQueue[i]]->executableName,
+			programList[arrivalTimeQueue[i]]->arrivalTime,
+			queueNames[programList[arrivalTimeQueue[i]]->type]);
+	}
+  }
+ #endif
+}
+  

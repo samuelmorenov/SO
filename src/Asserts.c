@@ -1,6 +1,10 @@
-#include "Asserts.h"
+// #include <stdarg.h>
+#include <stdlib.h>
+// #include <ctype.h>
+
 #include <string.h>
 #include <stdio.h>
+#include "Asserts.h"
 #include "MainMemory.h"
 #include "Clock.h"
 #include "ComputerSystemBase.h"
@@ -28,8 +32,8 @@ char *elements[]={
 	"PC",		// Program Counter
 	"ACC",		// ACCumulator
 	"IR_OP",	// Instruction Register OPeration code
-	"IR_O1",	// Instruction Register Operator 1
-	"IR_O2",	// Instruction Register OPerator 2
+	"IR_O1",	// Instruction Register Operand 1
+	"IR_O2",	// Instruction Register OPerand 2
 	"PSW",		// Processor State Word
 	"MAR",		// Memory Address Register
 	"MBR_OP",	// Memory Buffer Register OPeration code
@@ -47,20 +51,24 @@ char *elements[]={
 	"AMEM",	// Absolute MEMory
 	NULL};
 
-ASSERT_DATA asserts[MAX_ASSERTS];
+ASSERT_DATA * asserts;
+int MAX_ASSERTS=500; // Default number of asserts
 
 // Montículo de asertos
-int assertsQueue[MAX_ASSERTS];
+int * assertsQueue;
 int numOfElementsInAssertsQueue=0;
 
 // La lista de asertos en todos los instantes está al final de la assertsQueue metida al revés
-int beginOfAllTimeAsserts=MAX_ASSERTS;
+int beginOfAllTimeAsserts;
 
 // prototype functions
 int Asserts_IsThereANewAssert(int);
 void Asserts_CheckOneAssert(int);
 
 extern int GEN_ASSERTS;
+extern int LOAD_ASSERTS_CONF;
+
+char ASSERTS_FILE[MAXIMUMLENGTH]="asserts";
 
 int elementNumber(char *cmp) {
  int n=0;
@@ -99,10 +107,40 @@ int Asserts_LoadAsserts() {
  int rc;
  int en;
 
+ // ASSERT_DATA asserts[MAX_ASSERTS];
+ if (LOAD_ASSERTS_CONF) {
+	mf=fopen(ASSERTS_CONF_FILE,"r");
+	if (mf != NULL) {
+		if (fgets(lineRead,MAXIMUMLENGTH, mf)!= NULL) {
+			value=strtok(lineRead,",");
+			if (value!=NULL) 
+				MAX_ASSERTS=atoi(value);
+			element=strtok(NULL,"\n");
+		    if (element!=NULL){
+				strcpy(ASSERTS_FILE,element);
+		    }
+		}
+	}
+	fclose(mf);
+ }
+
+// ASSERT_DATA asserts[MAX_ASSERTS];
+ // Array of asserts
+ asserts =(ASSERT_DATA *) malloc(MAX_ASSERTS*sizeof(ASSERT_DATA));
+
+ // Heap of index of asserts
+ assertsQueue = (int *) malloc (MAX_ASSERTS*sizeof(int));
+
+// La lista de asertos en todos los instantes está al final de la assertsQueue metida al revés
+ beginOfAllTimeAsserts=MAX_ASSERTS;
+
+ ComputerSystem_DebugMessage(80, POWERON, ASSERTS_FILE, MAX_ASSERTS);
+ 
  mf=fopen(ASSERTS_FILE, "r");
  if (mf==NULL) {
-   asserts[0].time=-1;
-   return -1;
+ 	asserts[0].time=-1;
+	// ComputerSystem_DebugMessage(81,POWERON);
+	return -1;
   }
    
    while (fgets(lineRead,MAXIMUMLENGTH, mf) != NULL && numberAsserts<MAX_ASSERTS) {
@@ -111,7 +149,7 @@ int Asserts_LoadAsserts() {
 	time=strtok(lineRead,",");
     if (time==NULL){
  		// printf("Illegal Assert in line %d of file %s\n",lineNumber,ASSERTS_FILE);
-		ComputerSystem_DebugMessage(87,POWERON,lineNumber,ASSERTS_FILE);
+		ComputerSystem_DebugMessage(81,POWERON,lineNumber,ASSERTS_FILE);
 		continue;
 	}
 	
@@ -121,14 +159,14 @@ int Asserts_LoadAsserts() {
 	element=strtok(NULL,",");
     if (element==NULL){
  		// printf("Illegal Assert in line %d of file %s\n",lineNumber,ASSERTS_FILE);
-		ComputerSystem_DebugMessage(87,POWERON,lineNumber,ASSERTS_FILE);
+		ComputerSystem_DebugMessage(81,POWERON,lineNumber,ASSERTS_FILE);
 		continue;
 	}
 
 	value=strtok(NULL,",");
     if (value==NULL){
  		// printf("Illegal Assert in line %d of file %s\n",lineNumber,ASSERTS_FILE);
-		ComputerSystem_DebugMessage(87,POWERON,lineNumber,ASSERTS_FILE);
+		ComputerSystem_DebugMessage(81,POWERON,lineNumber,ASSERTS_FILE);
 		continue;
 	}
     address=strtok(NULL,"\n");
@@ -140,7 +178,7 @@ int Asserts_LoadAsserts() {
       rc=sscanf(time,"%d",&a.time);
 	  if (rc==0){
  		// printf("Illegal time format in line %d of file %s\n",lineNumber,ASSERTS_FILE);
-		ComputerSystem_DebugMessage(88,POWERON,lineNumber,ASSERTS_FILE);
+		ComputerSystem_DebugMessage(82,POWERON,lineNumber,ASSERTS_FILE);
 		continue;
 	  }
 	}
@@ -158,7 +196,8 @@ int Asserts_LoadAsserts() {
 		rc=sscanf(value,"%d",&a.value);
 
     if (rc==0){
- 			printf("Illegal expected value format in line %d of file %s (%s)\n",lineNumber,ASSERTS_FILE,value);
+ 			// printf("Illegal expected value format in line %d of file %s (%s)\n",lineNumber,ASSERTS_FILE,value);
+			ComputerSystem_DebugMessage(86,POWERON,lineNumber,ASSERTS_FILE, value);
 			continue;
 	}
 
@@ -167,13 +206,13 @@ int Asserts_LoadAsserts() {
 	if ((en==RMEM_OP) || (en==RMEM_O1) || (en==RMEM_O2) || (en==AMEM_OP) || (en==AMEM_O1) || (en==AMEM_O2) || (en==RMEM) || (en==AMEM)) {
 		if (address==NULL){
  			// printf("Illegal Assert in line %d of file %s\n",lineNumber,ASSERTS_FILE);
-			ComputerSystem_DebugMessage(87,POWERON,lineNumber,ASSERTS_FILE);
+			ComputerSystem_DebugMessage(81,POWERON,lineNumber,ASSERTS_FILE);
 			continue;
 		}
 		rc=sscanf(address,"%d",&a.address);
         if (rc==0){
 	 		// printf("Illegal address format in line %d of file %s\n",lineNumber,ASSERTS_FILE);
-			ComputerSystem_DebugMessage(89,POWERON,lineNumber,ASSERTS_FILE);
+			ComputerSystem_DebugMessage(87,POWERON,lineNumber,ASSERTS_FILE);
 			continue;    
 	    }
 	}
@@ -193,9 +232,11 @@ int Asserts_LoadAsserts() {
    fclose(mf);
    if (numberAsserts==MAX_ASSERTS)
 		// printf("Warning maximun number of asserts reached !!!  (%d)\n",numberAsserts);
-		ComputerSystem_DebugMessage(86,POWERON,lineNumber,ASSERTS_FILE);
+		ComputerSystem_DebugMessage(83,POWERON,lineNumber,ASSERTS_FILE);
    else
 	   asserts[numberAsserts].time=-1; // Para indicar el fin de los asertos (sobraría)
+
+   ComputerSystem_DebugMessage(82,POWERON,numberAsserts);
    return numberAsserts;
 }
 
@@ -226,19 +267,19 @@ void assertMsg(int time, char *ele, int expectedValue, int realValue, int addr) 
 	}	
 
 	// printf("Assert failed. Time: %d; Element: %s; ", time, ele);
-	ComputerSystem_DebugMessage(90,ERROR, time, ele);
+	ComputerSystem_DebugMessage(88,ERROR, time, ele);
 	en=elementNumber(ele);
 	
 	if ((en==RMEM_OP) || (en==AMEM_OP) || (en==IR_OP) || (en==MBR_OP)) 
 	  	// printf("Expected: '%c'; Real: '%c'", expectedValue, realValue);
-	  	ComputerSystem_DebugMessage(91,ERROR, expectedValue, realValue);
+	  	ComputerSystem_DebugMessage(89,ERROR, expectedValue, realValue);
 	else
 		// printf("Expected: %d; Real: %d", expectedValue, realValue);
-		ComputerSystem_DebugMessage(92,ERROR, expectedValue, realValue);
+		ComputerSystem_DebugMessage(90,ERROR, expectedValue, realValue);
 	
 	if ((en==RMEM_OP) || (en==RMEM_O1) || (en==RMEM_O2) || (en==AMEM_OP) || (en==AMEM_O1) || (en==AMEM_O2) || (en==RMEM) || (en==AMEM)) 
 		// printf("; Memory address: %d", addr);
-		ComputerSystem_DebugMessage(93,ERROR, addr);
+		ComputerSystem_DebugMessage(91,ERROR, addr);
 	
 	// printf("\n");
 	ComputerSystem_DebugMessage(98, ERROR, "\n");
@@ -257,7 +298,7 @@ void Asserts_CheckAsserts(){
             Asserts_CheckOneAssert(na);
 		}
 		else {
-			ComputerSystem_DebugMessage(95,ERROR,asserts[na].time,asserts[na].element); 
+			ComputerSystem_DebugMessage(93,ERROR,asserts[na].time,asserts[na].element); 
 		}
 	}
 
@@ -455,5 +496,5 @@ int Asserts_IsThereANewAssert(int currentTime) {
 void Asserts_TerminateAssertions(){
 	if (numOfElementsInAssertsQueue)
 		// printf("Warning, numOfElementsInAssertsQueue unchecked asserts in Asserts queue !!! );
-		ComputerSystem_DebugMessage(94,ERROR,numOfElementsInAssertsQueue);
+		ComputerSystem_DebugMessage(92,ERROR,numOfElementsInAssertsQueue);
 };

@@ -106,6 +106,11 @@ int Heap_compare_wakeup(int value1, int value2) {
 #endif
 }
 
+// Auxiliary for arrival-time comparations
+int Heap_compare_arrival(int value1, int value2) {
+  return programList[value2]->arrivalTime - programList[value1]->arrivalTime;
+}
+
 // Auxiliary for assert-time comparations
 int Heap_compare_assertsTime(int value1, int value2) {
   return asserts[value2].time - asserts[value1].time;
@@ -119,6 +124,8 @@ int Heap_compare(int value1, int value2, int queueType) {
 	  return Heap_compare_wakeup(value1, value2);
 	case QUEUE_PRIORITY:
 	  return Heap_compare_priority(value1, value2);
+	case QUEUE_ARRIVAL:
+	  return Heap_compare_arrival(value1, value2);
 	case QUEUE_ASSERTS:
 	  return Heap_compare_assertsTime(value1, value2);
 	default:

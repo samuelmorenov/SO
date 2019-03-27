@@ -2,7 +2,9 @@
 #include "OperatingSystem.h"
 #include "Processor.h"
 #include "Buses.h"
+#include "ComputerSystemBase.h"
 #include "Clock.h"
+#include "Heap.h"
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -17,9 +19,9 @@ void OperatingSystem_PrintProcessTableAssociation();
 
 extern int executingProcessID;
 #ifdef SLEEPINGQUEUE
-	extern char * queueNames [];
+	extern char * queueNames []; 
 #endif
-
+	
 // Search for a free entry in the process table. The index of the selected entry
 // will be used as the process identifier
 int OperatingSystem_ObtainAnEntryInTheProcessTable() {
@@ -30,10 +32,24 @@ int OperatingSystem_ObtainAnEntryInTheProcessTable() {
 
 	while (index<PROCESSTABLEMAXSIZE) {
 		entry = (orig+index)%PROCESSTABLEMAXSIZE;
-		if (processTable[entry].busy==0)
+		if (processTable[entry].busy==0) {
 			return entry;
-		else
-			index++;
+		}
+		else {
+			if (++index==PROCESSTABLEMAXSIZE) { // if no entries free, remove zombie proceses
+				int i;
+				for (i=0;i<PROCESSTABLEMAXSIZE;i++)
+					if (processTable[i].busy && (processTable[i].state==EXIT)) {
+						OperatingSystem_ShowTime(SYSPROC);
+						ComputerSystem_DebugMessage(33,SYSPROC
+							,i,programList[processTable[i].programListIndex]->executableName
+							,processTable[i].processSize
+							,processTable[i].initialPhysicalAddress);
+						processTable[i].busy=0;
+						index=0; // New search after liberation of PCB
+					}
+			}
+		}
 	}
 	return NOFREEENTRY;
 }
@@ -45,7 +61,7 @@ int OperatingSystem_ObtainProgramSize(FILE **programFile, char *program) {
 	char lineRead[MAXLINELENGTH];
 	int isComment=1;
 	int programSize;
-
+	
 	*programFile= fopen(program, "r");
 	
 	// Check if programFile exists
@@ -131,7 +147,7 @@ int OperatingSystem_LoadProgram(FILE *programFile, int initialAddress, int size)
 				  	op2=atoi(token2);
 				}
 			}
-
+			
 			// More instructions than size...
 			if (++nbInstructions > size){
 				return TOOBIGPROCESS;
@@ -154,7 +170,7 @@ int OperatingSystem_LoadProgram(FILE *programFile, int initialAddress, int size)
 // Auxiliar for check that line begins with positive number
 int OperatingSystem_lineBeginsWithANumber(char * line) {
 	int i;
-
+	
 	for (i=0; i<strlen(line) && line[i]==' '; i++); // Don't consider blank spaces
 	// If is there a digit number...
 	if (i<strlen(line) && isdigit(line[i]))
@@ -166,10 +182,13 @@ int OperatingSystem_lineBeginsWithANumber(char * line) {
 
 
 void OperatingSystem_ReadyToShutdown(){
+	int sipIdPCtoShutdown=processTable[sipID].initialPhysicalAddress+processTable[sipID].processSize-1;
 	// Simulation must finish (done by modifying the PC of the System Idle Process so it points to its 'halt' instruction,
 	// located at the last memory position used by that process, and dispatching sipId (next ShortTermSheduled)
-	processTable[sipID].copyOfPCRegister=processTable[sipID].initialPhysicalAddress+processTable[sipID].processSize-1;
-
+	if (executingProcessID==sipID)
+		Processor_CopyInSystemStack(MAINMEMORYSIZE-1, sipIdPCtoShutdown);
+	else
+		processTable[sipID].copyOfPCRegister=sipIdPCtoShutdown;
 }
 
 
@@ -180,16 +199,16 @@ void OperatingSystem_ShowTime(char section) {
 }
 
 // Show general status
-void OperatingSystem_PrintStatus(){
+void OperatingSystem_PrintStatus(){ 
 	OperatingSystem_PrintExecutingProcessInformation(); // Show executing process information
 	OperatingSystem_PrintReadyToRunQueue();  // Show Ready to run queues implemented for students
 	OperatingSystem_PrintSleepingProcessQueue(); // Show Sleeping process queue
 	OperatingSystem_PrintProcessTableAssociation(); // Show PID-Program's name association
-
+	ComputerSystem_PrintArrivalTimeQueue(); // Show arrival queue of programs
 }
 
  // Show Executing process information
-void OperatingSystem_PrintExecutingProcessInformation(){
+void OperatingSystem_PrintExecutingProcessInformation(){ 
 #ifdef SLEEPINGQUEUE
 
 	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
@@ -204,8 +223,8 @@ void OperatingSystem_PrintExecutingProcessInformation(){
 #endif
 }
 
-// Show SleepingProcessQueue
-void OperatingSystem_PrintSleepingProcessQueue(){
+// Show SleepingProcessQueue 
+void OperatingSystem_PrintSleepingProcessQueue(){ 
 #ifdef SLEEPINGQUEUE
 
 	int i;
@@ -220,7 +239,7 @@ void OperatingSystem_PrintSleepingProcessQueue(){
 			if (i<numberOfSleepingProcesses-1)
 	  			ComputerSystem_DebugMessage(98,SHORTTERMSCHEDULE,", ");
   		}
-  	else
+  	else 
 	  	ComputerSystem_DebugMessage(98,SHORTTERMSCHEDULE,"[--- empty queue ---]");
   ComputerSystem_DebugMessage(98,SHORTTERMSCHEDULE,"\n");
 
@@ -265,7 +284,7 @@ void OperatingSystem_PrepareTeachersDaemons(){
     	if (arrivalTime==NULL
     		|| sscanf(arrivalTime,"%d",&time)==0)
     		time=0;
-
+    	
     	progData=(PROGRAMS_DATA *) malloc(sizeof(PROGRAMS_DATA));
     	progData->executableName = (char *) malloc((strlen(name)+1)*sizeof(char));
     	strcpy(progData->executableName,name);
@@ -273,5 +292,31 @@ void OperatingSystem_PrepareTeachersDaemons(){
     	progData->type=DAEMONPROGRAM;
     	programList[baseDaemonsInProgramList++]=progData;
 	}
+}
+
+// This function returns:
+// 		-1 if no programs in arrivalTimeQueue
+//		1 if any program arrivalTime is now
+//		0 else
+// considered by the LTS to create processes at the current time
+int OperatingSystem_IsThereANewProgram() {
+#ifdef ARRIVALQUEUE
+        int currentTime;
+		int programArrivalTime;
+		int indexInProgramList = Heap_getFirst(arrivalTimeQueue,numberOfProgramsInArrivalTimeQueue);
+
+		if (indexInProgramList < 0)
+		  return -1;  // No new programs in command line list of programs
+		
+		// Get the current simulation time
+        currentTime = Clock_GetTime();
+		
+		// Get arrivalTime of next program
+		programArrivalTime = programList[indexInProgramList]->arrivalTime; 
+
+		if (programArrivalTime <= currentTime)
+		  return 1;  //  There'is new program to start
+#endif		 
+		return 0;  //  No program in current time
 }
 

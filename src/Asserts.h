@@ -1,9 +1,9 @@
 #ifndef CHECKASSERTS_H
 #define CHECKASSERTS_H
 
-#define MAX_ASSERTS 500
+// #define MAX_ASSERTS 500
 #define MAXIMUMLENGTH 64
-#define ASSERTS_FILE "asserts"
+#define ASSERTS_CONF_FILE "asserts.conf"
 #define E_SIZE 8 
 
 enum assertList {
@@ -47,6 +47,6 @@ typedef struct {
  void Asserts_CheckAsserts();
  void Asserts_TerminateAssertions();
 
-extern ASSERT_DATA asserts[MAX_ASSERTS];
+extern ASSERT_DATA * asserts;
 
 #endif
