@@ -112,7 +112,7 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	OperatingSystem_PrepareDaemons(daemonsIndex);
 
 	//Ejercicio V3.0
-	ComputerSystem_FillInArrivalTimeQueue(); //TODO V3.0
+	ComputerSystem_FillInArrivalTimeQueue();
 	OperatingSystem_PrintStatus();
 
 	// Create all user processes from the information given in the command line
@@ -169,14 +169,28 @@ void OperatingSystem_PrepareDaemons(int programListDaemonsBase) {
 // Initially, it creates a process from each program specified in the 
 // 			command lineand daemons programs
 /**
+ * Planificador a largo plazo
  * Crea un proceso para cada programa. Da errores en caso de no poder
  * Modificado: V2.7
  */
 int OperatingSystem_LongTermScheduler() {
 
+	/*
+	 * TODO: Modifica tu planificador a largo plazo para que se intenten
+	 * crear los procesos correspondientes mientras llamadas sucesivas
+	 * a OperatingSystem_IsThereANewProgram devuelvan 1, indicando
+	 * que hay programas que han llegado al sistema hasta el momento actual.
+	 * Puedes mirar cómo se utiliza la función Heap_poll() en otras colas.
+	 */
+
 	int PID, i, numberOfSuccessfullyCreatedProcesses = 0;
 
 	for (i = 0; programList[i] != NULL && i < PROGRAMSMAXNUMBER; i++) {
+
+//		if(OperatingSystem_IsThereANewProgram() < 1){
+//			break;//TODO
+//		}
+
 		PID = OperatingSystem_CreateProcess(i);
 		char *name = programList[i]->executableName;
 		OperatingSystem_ShowTime(INIT);
@@ -329,6 +343,7 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 // It uses processes priorities to make the decission. Given that the READY queue is ordered
 // depending on processes priority, the STS just selects the process in front of the READY queue
 /**
+ * Planificador a corto plazo
  * Busca el proceso de entre todas las colas ready con mas priodirdad
  * Modificado: V1.11
  */
@@ -637,9 +652,7 @@ void OperatingSystem_HandleClockInterrupt() {
 	OperatingSystem_ShowTime(INTERRUPT);
 	ComputerSystem_DebugMessage(120, INTERRUPT, numberOfClockInterrupts);
 	numberOfClockInterrupts = numberOfClockInterrupts + 1;
-
 	OperatingSystem_WakeUpProcesses();
-
 	return;
 }
 
@@ -765,6 +778,6 @@ void OperatingSystem_CambiarProcesoAlMasPrioritario() {
  * Devuelve el PID del proceso actual en ejecucion
  * Modificado: V3.1
  */
-int OperatingSystem_GetExecutingProcessID(){
+int OperatingSystem_GetExecutingProcessID() {
 	return executingProcessID;
 }

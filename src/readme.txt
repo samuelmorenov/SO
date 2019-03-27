@@ -1,1 +1,1 @@
-He realizado los ejercicios del 1 al 8 de la V2 completos.
+He realizado los ejercicios 0 y 1 de la V2 completos. Empece a ver el 2 pero aun no se como hacerlo
