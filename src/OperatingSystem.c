@@ -115,7 +115,6 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	ComputerSystem_FillInArrivalTimeQueue(); //TODO V3.0
 	OperatingSystem_PrintStatus();
 
-	Test("Test",0);
 	// Create all user processes from the information given in the command line
 	//Ejercicio 14
 	if (OperatingSystem_LongTermScheduler() == 0) {
@@ -141,7 +140,6 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	// Initial operation for Operating System
 	Processor_SetPC(OS_address_base);
 
-	Test("Test",1);
 }
 
 // Daemon processes are system processes, that is, they work together with the OS.
@@ -642,7 +640,6 @@ void OperatingSystem_HandleClockInterrupt() {
 
 	OperatingSystem_WakeUpProcesses();
 
-	Test("Test",3);
 	return;
 }
 
