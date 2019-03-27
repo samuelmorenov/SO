@@ -641,6 +641,8 @@ void OperatingSystem_HandleClockInterrupt() {
 	numberOfClockInterrupts = numberOfClockInterrupts + 1;
 
 	OperatingSystem_WakeUpProcesses();
+
+	Test("Test",3);
 	return;
 }
 
@@ -762,3 +764,10 @@ void OperatingSystem_CambiarProcesoAlMasPrioritario() {
 	OperatingSystem_ExtractFromReadyToRun(IDActual);
 }
 
+/**
+ * Devuelve el PID del proceso actual en ejecucion
+ * Modificado: V3.1
+ */
+int OperatingSystem_GetExecutingProcessID(){
+	return executingProcessID;
+}
