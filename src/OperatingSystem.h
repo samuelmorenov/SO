@@ -65,6 +65,7 @@ extern int sipID;
 // Functions prototypes
 void OperatingSystem_Initialize();
 void OperatingSystem_InterruptLogic(int);
+int OperatingSystem_GetExecutingProcessID();
 
 
 #endif

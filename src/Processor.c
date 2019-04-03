@@ -14,6 +14,7 @@ int Processor_FetchInstruction();
 void Processor_DecodeAndExecuteInstruction();
 void Processor_ManageInterrupts();
 
+
 // Processor registers
 int registerPC_CPU; // Program counter
 int registerAccumulator_CPU; // Accumulator

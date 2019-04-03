@@ -24,7 +24,7 @@ int OperatingSystem_CreateProcess(int);
 int OperatingSystem_ObtainMainMemory(int, int);
 int OperatingSystem_ShortTermScheduler();
 int OperatingSystem_ExtractFromReadyToRun();
-void OperatingSystem_HandleException();
+void OperatingSystem_HandleException(int excepcion);
 void OperatingSystem_HandleSystemCall();
 void OperatingSystem_PrintReadyToRunQueue();
 void OperatingSystem_Print_Cambio_Estado(int ID, int anterior,
@@ -38,7 +38,7 @@ void OperatingSystem_Dormir_Proceso_Actual();
 int OperatingSystem_GetWhenToWakeUp();
 void OperatingSystem_CambiarProcesoAlMasPrioritario();
 void Test(char const *cadena, int numero);
-int OperatingSystem_GetExecutingProcessID();
+
 
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
@@ -186,7 +186,9 @@ int OperatingSystem_LongTermScheduler() {
 
 	int PID, i, numberOfSuccessfullyCreatedProcesses = 0;
 
-	for (i = 0; programList[i] != NULL && i < PROGRAMSMAXNUMBER && OperatingSystem_IsThereANewProgram() == 1; i++) {
+	for (i = 0;
+			programList[i] != NULL && i < PROGRAMSMAXNUMBER
+					&& OperatingSystem_IsThereANewProgram() == 1; i++) {
 
 		PID = OperatingSystem_CreateProcess(i);
 		char *name = programList[i]->executableName;
@@ -440,12 +442,33 @@ void OperatingSystem_SaveContext(int PID) {
  * Manejador de excepciones
  * Modificado: V2.7
  */
-void OperatingSystem_HandleException() {
+void OperatingSystem_HandleException(int excepcion) { //char const *tipo) {
 
 	// Show message "Process [executingProcessID] has generated an exception and is terminating\n"
 	OperatingSystem_ShowTime(SYSPROC);
-	ComputerSystem_DebugMessage(23, SYSPROC, executingProcessID,
-			programList[processTable[executingProcessID].programListIndex]->executableName);
+	//ComputerSystem_DebugMessage(23, SYSPROC, executingProcessID, programList[processTable[executingProcessID].programListIndex]->executableName);
+	//Ejercicio 4.2
+	//TODO
+	char const *string;
+	switch (excepcion) {
+	case DIVISIONBYZERO:
+		string = "division by zero";
+		break;
+	case INVALIDPROCESSORMODE:
+		string = "invalid processor mode";
+		break;
+	case INVALIDADDRESS:
+		string = "invalid address";
+		break;
+	case INVALIDINSTRUCTION:
+		string = "invalid instruction";
+		break;
+	}
+
+	ComputerSystem_DebugMessage(140, INTERRUPT, executingProcessID,
+			programList[processTable[executingProcessID].programListIndex]->executableName,
+			string);
+	//[24] Process [1 - NombreProcesoPid1] has caused an exception (invalid address) and is being terminated
 
 	OperatingSystem_TerminateProcess();
 	OperatingSystem_PrintStatus(); //Ejercicio V2.7
@@ -522,7 +545,7 @@ void OperatingSystem_InterruptLogic(int entryPoint) {
 		OperatingSystem_HandleSystemCall();
 		break;
 	case EXCEPTION_BIT: // EXCEPTION_BIT=6
-		OperatingSystem_HandleException();
+		OperatingSystem_HandleException(INVALIDINSTRUCTION);//TODO Ejercicio v4.2 no se si es este tipo de excepcion
 		break;
 	case CLOCKINT_BIT: // CLOCKINT_BIT=9
 		OperatingSystem_HandleClockInterrupt();

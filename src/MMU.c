@@ -15,10 +15,6 @@ int registerMAR_MMU;
 // Logical address is in registerMAR_MMU. If correct, physical address is produced
 // by adding logical address and base register
 int MMU_readMemory() {
-	if (MMU_VerIntervalo() == MMU_FAIL) { //Ejercicio v4.1
-		return MMU_FAIL;
-	}
-
 	if (Processor_PSW_BitState(EXECUTION_MODE_BIT)) { // Protected mode
 		if (registerMAR_MMU < MAINMEMORYSIZE) {
 			// Send to the main memory HW the physical address to write in
@@ -27,6 +23,7 @@ int MMU_readMemory() {
 			MainMemory_readMemory();
 			return MMU_SUCCESS;
 		} else {
+			Processor_RaiseException(INVALIDADDRESS);//Ejercicio v4.1
 			return MMU_FAIL;
 		}
 	} else // Non-Protected mode
@@ -39,6 +36,7 @@ int MMU_readMemory() {
 		MainMemory_readMemory();
 		return MMU_SUCCESS;
 	} else {
+		Processor_RaiseException(INVALIDADDRESS);//Ejercicio v4.1
 		return MMU_FAIL;
 	}
 
@@ -47,10 +45,6 @@ int MMU_readMemory() {
 // Logical address is in registerMAR_MMU. If correct, physical address is produced
 // by adding logical address and base register
 int MMU_writeMemory() {
-	if (MMU_VerIntervalo() == MMU_FAIL) { //Ejercicio v4.1
-		return MMU_FAIL;
-	}
-
 	if (Processor_PSW_BitState(EXECUTION_MODE_BIT)) // Protected mode
 		if (registerMAR_MMU < MAINMEMORYSIZE) {
 			// Send to the main memory HW the physical address to write in
@@ -59,6 +53,7 @@ int MMU_writeMemory() {
 			MainMemory_writeMemory();
 			return MMU_SUCCESS;
 		} else {
+			Processor_RaiseException(INVALIDADDRESS);//Ejercicio v4.1
 			return MMU_FAIL;
 		}
 	else   // Non-Protected mode
@@ -71,26 +66,9 @@ int MMU_writeMemory() {
 		MainMemory_writeMemory();
 		return MMU_SUCCESS;
 	} else {
+		Processor_RaiseException(INVALIDADDRESS);//Ejercicio v4.1
 		return MMU_FAIL;
 	}
-}
-
-/*
- * Modifica el código de tu MMU para que tenga en cuenta que el rango
- * de direcciones lógicas válidas para el esquema de particiones fijas
- * está comprendido en el intervalo [0, tamañoProceso-1]. Si la
- * dirección lógica está fuera de ese intervalo, la MMU tendrá que
- * elevar una excepción del tipo INVALIDADDRESS.
- */
-int MMU_VerIntervalo() {
-	// registerLimit_MMU se establece desde OperatingSystem_RestoreContext
-	// deberia estar bien pero ya lo hace arriba, asi que no se
-	int tamanioProceso = 1;
-	if (registerMAR_MMU < 0 || registerMAR_MMU > registerLimit_MMU) {
-		Processor_RaiseException(INVALIDADDRESS);
-		return MMU_FAIL;
-	}
-	return MMU_SUCCESS;
 }
 
 // Setter for registerMAR_MMU

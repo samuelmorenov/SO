@@ -28,6 +28,7 @@ enum EXCEPTIONS {DIVISIONBYZERO, INVALIDPROCESSORMODE, INVALIDADDRESS, INVALIDIN
 void Processor_InitializeInterruptVectorTable();
 void Processor_InstructionCycleLoop();
 void Processor_RaiseInterrupt(const unsigned int);
+void Processor_RaiseException(int typeOfException);
 
 char * Processor_ShowPSW();
 
