@@ -241,9 +241,8 @@ void Processor_DecodeAndExecuteInstruction() {
 
 		// Unknown instruction
 	default:
-		OperatingSystem_HandleException(INVALIDINSTRUCTION); //Ejercicio 4.3
+		OperatingSystem_InterruptLogic(EXCEPTION_BIT);//Ejercicio 4.3
 		Processor_RaiseException(EXCEPTION_BIT);
-		printf(":O");//TODO BORRAR
 		registerPC_CPU++;
 		break;
 	}

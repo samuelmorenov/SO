@@ -24,7 +24,7 @@ int OperatingSystem_CreateProcess(int);
 int OperatingSystem_ObtainMainMemory(int, int);
 int OperatingSystem_ShortTermScheduler();
 int OperatingSystem_ExtractFromReadyToRun();
-//void OperatingSystem_HandleException(int excepcion); ?????
+void OperatingSystem_HandleException(int excepcion);
 void OperatingSystem_HandleSystemCall();
 void OperatingSystem_PrintReadyToRunQueue();
 void OperatingSystem_Print_Cambio_Estado(int ID, int anterior,
@@ -448,7 +448,6 @@ void OperatingSystem_HandleException(int excepcion) { //char const *tipo) {
 	OperatingSystem_ShowTime(SYSPROC);
 	//ComputerSystem_DebugMessage(23, SYSPROC, executingProcessID, programList[processTable[executingProcessID].programListIndex]->executableName);
 	//Ejercicio 4.2
-	//TODO
 	char const *string;
 	switch (excepcion) {
 	case DIVISIONBYZERO:
@@ -545,7 +544,7 @@ void OperatingSystem_InterruptLogic(int entryPoint) {
 		OperatingSystem_HandleSystemCall();
 		break;
 	case EXCEPTION_BIT: // EXCEPTION_BIT=6
-		OperatingSystem_HandleException(INVALIDINSTRUCTION);//TODO Ejercicio v4.2 no se si es este tipo de excepcion
+		OperatingSystem_HandleException(INVALIDINSTRUCTION);
 		break;
 	case CLOCKINT_BIT: // CLOCKINT_BIT=9
 		OperatingSystem_HandleClockInterrupt();
