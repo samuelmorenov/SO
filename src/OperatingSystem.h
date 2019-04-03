@@ -66,6 +66,7 @@ extern int sipID;
 void OperatingSystem_Initialize();
 void OperatingSystem_InterruptLogic(int);
 int OperatingSystem_GetExecutingProcessID();
+void OperatingSystem_HandleException(int excepcion);
 
 
 #endif

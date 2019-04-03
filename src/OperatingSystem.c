@@ -24,7 +24,7 @@ int OperatingSystem_CreateProcess(int);
 int OperatingSystem_ObtainMainMemory(int, int);
 int OperatingSystem_ShortTermScheduler();
 int OperatingSystem_ExtractFromReadyToRun();
-void OperatingSystem_HandleException(int excepcion);
+//void OperatingSystem_HandleException(int excepcion); ?????
 void OperatingSystem_HandleSystemCall();
 void OperatingSystem_PrintReadyToRunQueue();
 void OperatingSystem_Print_Cambio_Estado(int ID, int anterior,
