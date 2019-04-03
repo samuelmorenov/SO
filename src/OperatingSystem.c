@@ -177,7 +177,7 @@ void OperatingSystem_PrepareDaemons(int programListDaemonsBase) {
 int OperatingSystem_LongTermScheduler() {
 
 	/*
-	 * TODO: Modifica tu planificador a largo plazo para que se intenten
+	 * V3.2 Modifica tu planificador a largo plazo para que se intenten
 	 * crear los procesos correspondientes mientras llamadas sucesivas
 	 * a OperatingSystem_IsThereANewProgram devuelvan 1, indicando
 	 * que hay programas que han llegado al sistema hasta el momento actual.
@@ -649,7 +649,16 @@ void OperatingSystem_HandleClockInterrupt() {
 	OperatingSystem_ShowTime(INTERRUPT);
 	ComputerSystem_DebugMessage(120, INTERRUPT, numberOfClockInterrupts);
 	numberOfClockInterrupts = numberOfClockInterrupts + 1;
+
+	//Ejercicio V3.3
+	int Ready_Antes = numberOfReadyToRunProcesses[0];
 	OperatingSystem_WakeUpProcesses();
+	OperatingSystem_LongTermScheduler();
+	int Ready_Despues = numberOfReadyToRunProcesses[0];
+	if (Ready_Antes != Ready_Despues) {
+		OperatingSystem_PrintStatus();
+		OperatingSystem_CambiarProcesoAlMasPrioritario();
+	}
 	return;
 }
 
