@@ -6,6 +6,8 @@
 #define QUEUE_ARRIVAL 2
 #define QUEUE_ASSERTS 3
 
+#define ARRIVALQUEUE
+
 // Implements the extraction operation (the element with the highest priority).
 // Parameters are:
 //    heap: the corresponding queue: readyToRun, asserts, UserProgramList or sleepingQueue

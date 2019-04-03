@@ -38,6 +38,7 @@ void OperatingSystem_Dormir_Proceso_Actual();
 int OperatingSystem_GetWhenToWakeUp();
 void OperatingSystem_CambiarProcesoAlMasPrioritario();
 void Test(char const *cadena, int numero);
+int OperatingSystem_GetExecutingProcessID();
 
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
@@ -185,11 +186,7 @@ int OperatingSystem_LongTermScheduler() {
 
 	int PID, i, numberOfSuccessfullyCreatedProcesses = 0;
 
-	for (i = 0; programList[i] != NULL && i < PROGRAMSMAXNUMBER; i++) {
-
-//		if(OperatingSystem_IsThereANewProgram() < 1){
-//			break;//TODO
-//		}
+	for (i = 0; programList[i] != NULL && i < PROGRAMSMAXNUMBER && OperatingSystem_IsThereANewProgram() == 1; i++) {
 
 		PID = OperatingSystem_CreateProcess(i);
 		char *name = programList[i]->executableName;
