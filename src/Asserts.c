@@ -236,7 +236,7 @@ int Asserts_LoadAsserts() {
    else
 	   asserts[numberAsserts].time=-1; // Para indicar el fin de los asertos (sobraría)
 
-   ComputerSystem_DebugMessage(82,POWERON,numberAsserts);
+   // ComputerSystem_DebugMessage(85,POWERON,numberAsserts);
    return numberAsserts;
 }
 

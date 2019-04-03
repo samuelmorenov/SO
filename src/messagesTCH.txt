@@ -21,6 +21,10 @@
 31,Arrival Time Queue:\n
 32,\t\t[@G%s@@, @R%d@@, @G%s@@]\n
 33,Zombie process [@R%d@@ -> @R%s@@], with size [@R%d@@] and initial address [@R%d@@] is removed from system\n
+40,Main memory state (@G%s@@):\n
+41,\t\t[@G%d@@] [@G%d@@ -> @G%d@@]
+42,[@G%d@@]\n
+43,[@G%s@@]\n
 
 // Message system messages
 60,Illegal Message Number in line @R%d@@ of file @R%s@@\n
