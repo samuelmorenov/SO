@@ -374,7 +374,7 @@ void OperatingSystem_ShowPartitionTable(char *mensaje) {
 	for (i=0;i<PARTITIONTABLEMAXSIZE && partitionsTable[i].initAddress>=0;i++) {
 		ComputerSystem_DebugMessage(41,SYSMEM,i,partitionsTable[i].initAddress,partitionsTable[i].size);
 		if (partitionsTable[i].occupied)
-			ComputerSystem_DebugMessage(42,SYSMEM,partitionsTable[i].PID);
+			ComputerSystem_DebugMessage(42,SYSMEM,partitionsTable[i].PID,programList[processTable[partitionsTable[i].PID].programListIndex]->executableName );
 		else
 			ComputerSystem_DebugMessage(43,SYSMEM,"AVAILABLE");
 	}

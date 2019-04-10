@@ -23,7 +23,7 @@
 33,Zombie process [@R%d@@ -> @R%s@@], with size [@R%d@@] and initial address [@R%d@@] is removed from system\n
 40,Main memory state (@G%s@@):\n
 41,\t\t[@G%d@@] [@G%d@@ -> @G%d@@]
-42,[@G%d@@]\n
+42,[@G%d - %s@@]\n
 43,[@G%s@@]\n
 
 // Message system messages

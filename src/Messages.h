@@ -1,7 +1,7 @@
 #ifndef MESSAGES_H
 #define MESSAGES_H
 
-#define NUMBEROFMSGS 64
+#define NUMBEROFMSGS 100
 
 #define STUDENT_MESSAGES_FILE "messagesSTD.txt"
 #define TEACHER_MESSAGES_FILE "messagesTCH.txt"
