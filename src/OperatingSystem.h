@@ -42,6 +42,10 @@ enum SystemCallIdentifiers { SYSCALL_END=3, SYSCALL_PRINTEXECPID=5, SYSCALL_YIEL
 #define NUMBEROFQUEUES 2
 enum ReadyToRunProcessQueues { USERPROCESSQUEUE, DAEMONSQUEUE };
 
+//Ejercicio V4.5
+// Partitions configuration file name definition
+#define MEMCONFIG "MemConfig"  // in OperatingSystem.h
+
 // A PCB contains all of the information about a process that is needed by the OS
 typedef struct {
 	int busy;

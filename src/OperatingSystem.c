@@ -94,6 +94,9 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	int i, selectedProcess;
 	FILE *programFile; // For load Operating System Code
 
+	//Ejercicio V4.5
+	OperatingSystem_InitializePartitionTable();
+
 	// Obtain the memory requirements of the program
 	int processSize = OperatingSystem_ObtainProgramSize(&programFile,
 			"OperatingSystemCode");
