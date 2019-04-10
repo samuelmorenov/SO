@@ -258,12 +258,12 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 		return priority;
 
 	/////////////////////////////////////
-
-	Test("test",1);
 	//TODO:
+	Test("test",0);
 	// Obtain enough memory space
 	int partition = OperatingSystem_ObtainMainMemory(processSize, PID);
 	if (partition == TOOBIGPROCESS || partition == MEMORYFULL) {
+		Test("test",1);
 		return partition;
 	}
 	Test("test",2);
@@ -278,9 +278,9 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	OperatingSystem_PCBInitialization(PID, loadingPhysicalAddress, processSize,
 			priority, indexOfExecutableProgram);
 	// Show message "Process [PID] created from program [executableName]\n"
-
-	/////////////////////////////////////
 	Test("test",3);
+	/////////////////////////////////////
+
 	OperatingSystem_ShowTime(INIT);
 	ComputerSystem_DebugMessage(22, INIT, PID,
 			executableProgram->executableName);
