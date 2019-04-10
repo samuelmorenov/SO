@@ -1,1 +1,1 @@
-He realizado los ejercicios 0 y 1 de la V2 completos. Empece a ver el 2 pero aun no se como hacerlo
+Realizado ejercicio 5. He hecho el 6, pero falla, aun tengo que depurarlo

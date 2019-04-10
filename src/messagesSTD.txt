@@ -38,13 +38,18 @@
 120,@CClock interrupt number [%d] has ocurred\n@@
 
 //Ejercicio 2.6
-121,Process [@G%d - %s@@] is thrown out of the processor by process [@G%d - %s@@]
+121,Process [@G%d - %s@@] is thrown out of the processor by process [@G%d - %s@@]\n
 
 //Ejercicio 3.1
 130, %c %d %d (PID: @G%d@@, PC: @R%d@@, Accumulator: @R%d@@, PSW: @R%x@@ [@R%s@@])\n
 
 //Ejercicio 4.2
-140, Process [@R%d - %s@@] has caused an exception (@R%s@@) and is being terminated
+140,Process [@R%d - %s@@] has caused an exception (@R%s@@) and is being terminated\n
 
 //Ejercicio 4.4
-141, Process [@R%d - %s@@] has made an invalid system call (@R%ds@@) and is being terminated
+141,Process [@R%d - %s@@] has made an invalid system call (@R%ds@@) and is being terminated\n
+
+//Ejercicio 4.6
+142,Process [@G%d - %s@@] requests [@G%d@@] memory positions\n
+143,Partition [@G%d@@: @G%d@@ -> @G%d@@] has been assigned to process [@G%d - %s@@]\n
+144,@RERROR:  A  process  could  not  be  created  from  program  [%s]  because an appropriate partition is not available@@\n

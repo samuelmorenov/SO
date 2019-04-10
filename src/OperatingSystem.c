@@ -37,6 +37,7 @@ int OperatingSystem_ExtractFromSleepingQueue(int queueID);
 void OperatingSystem_Dormir_Proceso_Actual();
 int OperatingSystem_GetWhenToWakeUp();
 void OperatingSystem_CambiarProcesoAlMasPrioritario();
+int OperatingSystem_BestPartition(int processSize);
 void Test(char const *cadena, int numero);
 
 // The process table
@@ -87,7 +88,7 @@ int numberOfSleepingProcesses = 0;
 // Initial set of tasks of the OS
 /**
  * Inicializa el sistema operativo
- * Modificado: ejercicio V1.14
+ * Modificado: ejercicio V4.5
  */
 void OperatingSystem_Initialize(int daemonsIndex) {
 
@@ -255,10 +256,20 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	priority = OperatingSystem_ObtainPriority(programFile);
 	if (priority == PROGRAMNOTVALID)
 		return priority;
+
+	/////////////////////////////////////
+
+	Test("test",1);
+	//TODO:
 	// Obtain enough memory space
-	loadingPhysicalAddress = OperatingSystem_ObtainMainMemory(processSize, PID);
-	if (loadingPhysicalAddress == TOOBIGPROCESS)
-		return loadingPhysicalAddress;
+	int partition = OperatingSystem_ObtainMainMemory(processSize, PID);
+	if (partition == TOOBIGPROCESS || partition == MEMORYFULL) {
+		return partition;
+	}
+	Test("test",2);
+	loadingPhysicalAddress = partitionsTable[partition].initAddress;
+	int partitionSize = partitionsTable[partition].size;
+
 	// Load program in the allocated memory
 	if (OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress,
 			processSize) == TOOBIGPROCESS)
@@ -267,10 +278,18 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	OperatingSystem_PCBInitialization(PID, loadingPhysicalAddress, processSize,
 			priority, indexOfExecutableProgram);
 	// Show message "Process [PID] created from program [executableName]\n"
+
+	/////////////////////////////////////
+	Test("test",3);
 	OperatingSystem_ShowTime(INIT);
 	ComputerSystem_DebugMessage(22, INIT, PID,
 			executableProgram->executableName);
 
+	//TODO:
+	OperatingSystem_ShowTime(SYSMEM);
+	ComputerSystem_DebugMessage(22, SYSMEM, partition, loadingPhysicalAddress,
+			partitionSize, PID, executableProgram->executableName);
+	Test("test",4);
 	return PID;
 }
 
@@ -278,14 +297,74 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 // always obtains the chunk whose position in memory is equal to the processor identifier
 /**
  * Asignacion de trozos de memoria
- * Modificado: NO
+ * Modificado: 4.6
  */
 int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
-
+	//TODO:
+	/*
+	 * Modifica la función OperatingSystem_ObtainMainMemory()para que elija una par-tición
+	 * para el proceso siguiendo la política (estrategia) del mejor ajuste; si hubiese
+	 * varias, se debe elegir la que empiece en una dirección de memoria más baja
+	 */
 	if (processSize > MAINMEMORYSECTIONSIZE)
 		return TOOBIGPROCESS;
 
-	return PID * MAINMEMORYSECTIONSIZE;
+	int bestPartition = OperatingSystem_BestPartition(processSize);
+
+	if (!(bestPartition != TOOBIGPROCESS || bestPartition == MEMORYFULL)) {
+
+		partitionsTable[bestPartition].occupied = 1;
+		partitionsTable[bestPartition].PID = PID;
+
+		OperatingSystem_ShowTime(SYSMEM);
+		ComputerSystem_DebugMessage(142, SYSMEM, PID,
+				programList[processTable[PID].programListIndex]->executableName,
+				bestPartition);
+	} else {
+		//[1] ERROR:  A  process  could  not  be  created  from  program  [acceptableSizeExample]  because an appropriate partition is not available
+		OperatingSystem_ShowTime(ERROR);
+		ComputerSystem_DebugMessage(144, ERROR,
+				programList[processTable[PID].programListIndex]->executableName);
+	}
+
+	return bestPartition;
+
+}
+
+int OperatingSystem_BestPartition(int processSize) {
+	int currentPartition = 0;
+
+	int bestPartition = -1;
+	int bestSize = -1;
+
+	int noEsDemasiadoGrande = 0;
+	int algunaParticionLibre = 0;
+
+	for (currentPartition = 0; currentPartition < PARTITIONTABLEMAXSIZE;
+			currentPartition++) {
+		int currentSize = partitionsTable[currentPartition].size;
+
+		if (processSize - currentSize > -1) {
+			noEsDemasiadoGrande = 1;
+
+			if (partitionsTable[currentPartition].occupied == 0) {
+				algunaParticionLibre = 1;
+
+				if (currentSize < bestSize || bestSize == -1) {
+					bestPartition = currentPartition;
+					bestSize = currentSize;
+				}
+			}
+		}
+
+	}
+	if (noEsDemasiadoGrande == 0) {
+		return TOOBIGPROCESS;
+	}
+	if (algunaParticionLibre == 0) {
+		return MEMORYFULL;
+	}
+	return bestPartition;
 }
 
 // Assign initial values to all fields inside the PCB
@@ -302,7 +381,7 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress,
 	processTable[PID].state = NEW;
 	processTable[PID].priority = priority;
 	processTable[PID].programListIndex = processPLIndex;
-	// Daemons run in protected mode and MMU use real address
+// Daemons run in protected mode and MMU use real address
 	if (programList[processPLIndex]->type == DAEMONPROGRAM) {
 		//Ejericio 11
 
@@ -315,7 +394,7 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress,
 		processTable[PID].copyOfPCRegister = 0;
 		processTable[PID].copyOfPSWRegister = 0;
 	}
-	//New process [SystemIdleProcess] moving to the [NEW] state
+//New process [SystemIdleProcess] moving to the [NEW] state
 	OperatingSystem_ShowTime(SYSPROC);
 	ComputerSystem_DebugMessage(111, SYSPROC,
 			programList[processTable[PID].programListIndex]->executableName);
@@ -337,7 +416,7 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 		processTable[PID].state = READY;
 		OperatingSystem_Print_Cambio_Estado(PID, anterior, "READY");
 	}
-	//OperatingSystem_PrintReadyToRunQueue(); //Comentado en el ejercicio V2.8
+//OperatingSystem_PrintReadyToRunQueue(); //Comentado en el ejercicio V2.8
 }
 
 // The STS is responsible of deciding which process to execute when specific events occur.
@@ -364,10 +443,10 @@ int OperatingSystem_ShortTermScheduler() {
  */
 int OperatingSystem_ExtractFromReadyToRun(int queueID) {
 	int selectedProcess = NOPROCESS;
-	//selectedProcess=Heap_poll(readyToRunQueue,QUEUE_PRIORITY ,&numberOfReadyToRunProcesses);
+//selectedProcess=Heap_poll(readyToRunQueue,QUEUE_PRIORITY ,&numberOfReadyToRunProcesses);
 	selectedProcess = Heap_poll(readyToRunQueue[queueID], QUEUE_PRIORITY,
 			&numberOfReadyToRunProcesses[queueID]);
-	// Return most priority process or NOPROCESS if empty queue
+// Return most priority process or NOPROCESS if empty queue
 	return selectedProcess;
 }
 
@@ -378,14 +457,14 @@ int OperatingSystem_ExtractFromReadyToRun(int queueID) {
  */
 void OperatingSystem_Dispatch(int PID) {
 
-	// The process identified by PID becomes the current executing process
+// The process identified by PID becomes the current executing process
 	executingProcessID = PID;
-	// Change the process' state
+// Change the process' state
 	int anterior = processTable[PID].state;
 	processTable[PID].state = EXECUTING;
 	OperatingSystem_Print_Cambio_Estado(executingProcessID, anterior,
 			"EXECUTING");
-	// Modify hardware registers with appropriate values for the process identified by PID
+// Modify hardware registers with appropriate values for the process identified by PID
 	OperatingSystem_RestoreContext(PID);
 	OperatingSystem_PrintStatus();
 
@@ -398,13 +477,13 @@ void OperatingSystem_Dispatch(int PID) {
  */
 void OperatingSystem_RestoreContext(int PID) {
 
-	// New values for the CPU registers are obtained from the PCB
+// New values for the CPU registers are obtained from the PCB
 	Processor_CopyInSystemStack(MAINMEMORYSIZE - 1,
 			processTable[PID].copyOfPCRegister);
 	Processor_CopyInSystemStack(MAINMEMORYSIZE - 2,
 			processTable[PID].copyOfPSWRegister);
 
-	// Same thing for the MMU registers
+// Same thing for the MMU registers
 	MMU_SetBase(processTable[PID].initialPhysicalAddress);
 	MMU_SetLimit(processTable[PID].processSize);
 }
@@ -415,11 +494,11 @@ void OperatingSystem_RestoreContext(int PID) {
  * Modificado: V1.12
  */
 void OperatingSystem_PreemptRunningProcess() {
-	// Save in the process' PCB essential values stored in hardware registers and the system stack
+// Save in the process' PCB essential values stored in hardware registers and the system stack
 	OperatingSystem_SaveContext(executingProcessID);
-	// Change the process' state
+// Change the process' state
 	OperatingSystem_MoveToTheREADYState(executingProcessID);
-	// The processor is not assigned until the OS selects another process
+// The processor is not assigned until the OS selects another process
 	executingProcessID = NOPROCESS;
 }
 
@@ -430,11 +509,11 @@ void OperatingSystem_PreemptRunningProcess() {
  */
 void OperatingSystem_SaveContext(int PID) {
 
-	// Load PC saved for interrupt manager
+// Load PC saved for interrupt manager
 	processTable[PID].copyOfPCRegister = Processor_CopyFromSystemStack(
 	MAINMEMORYSIZE - 1);
 
-	// Load PSW saved for interrupt manager
+// Load PSW saved for interrupt manager
 	processTable[PID].copyOfPSWRegister = Processor_CopyFromSystemStack(
 	MAINMEMORYSIZE - 2);
 }
@@ -446,10 +525,10 @@ void OperatingSystem_SaveContext(int PID) {
  */
 void OperatingSystem_HandleException(int excepcion) { //char const *tipo) {
 
-	// Show message "Process [executingProcessID] has generated an exception and is terminating\n"
+// Show message "Process [executingProcessID] has generated an exception and is terminating\n"
 	OperatingSystem_ShowTime(SYSPROC);
-	//ComputerSystem_DebugMessage(23, SYSPROC, executingProcessID, programList[processTable[executingProcessID].programListIndex]->executableName);
-	//Ejercicio 4.2
+//ComputerSystem_DebugMessage(23, SYSPROC, executingProcessID, programList[processTable[executingProcessID].programListIndex]->executableName);
+//Ejercicio 4.2
 	char const *string;
 	switch (excepcion) {
 	case DIVISIONBYZERO:
@@ -469,7 +548,7 @@ void OperatingSystem_HandleException(int excepcion) { //char const *tipo) {
 	ComputerSystem_DebugMessage(140, INTERRUPT, executingProcessID,
 			programList[processTable[executingProcessID].programListIndex]->executableName,
 			string);
-	//[24] Process [1 - NombreProcesoPid1] has caused an exception (invalid address) and is being terminated
+//[24] Process [1 - NombreProcesoPid1] has caused an exception (invalid address) and is being terminated
 
 	OperatingSystem_TerminateProcess();
 	OperatingSystem_PrintStatus(); //Ejercicio V2.7
@@ -492,9 +571,9 @@ void OperatingSystem_TerminateProcess() {
 		// Simulation must finish 
 		OperatingSystem_ReadyToShutdown();
 	}
-	// Select the next process to execute (sipID if no more user processes)
+// Select the next process to execute (sipID if no more user processes)
 	selectedProcess = OperatingSystem_ShortTermScheduler();
-	// Assign the processor to that process
+// Assign the processor to that process
 	OperatingSystem_Dispatch(selectedProcess);
 }
 
@@ -507,7 +586,7 @@ void OperatingSystem_HandleSystemCall() {
 
 	int systemCallID;
 
-	// Register A contains the identifier of the issued system call
+// Register A contains the identifier of the issued system call
 	systemCallID = Processor_GetRegisterA();
 
 	switch (systemCallID) {
@@ -636,7 +715,7 @@ void OperatingSystem_Print_Cambio_Estado(int ID, int anterior,
 void OperatingSystem_TransferWithEcualPriority() {
 	int IDActual = executingProcessID;
 	int priority = processTable[executingProcessID].priority;
-	//Localizar proceso para cambiar:
+//Localizar proceso para cambiar:
 	int indexMasAlta = -1;
 	int j = 0;
 	int i = 0;
@@ -652,7 +731,7 @@ void OperatingSystem_TransferWithEcualPriority() {
 	if (indexMasAlta == -1) {
 		return;
 	}
-	//Imprimir el cambio:
+//Imprimir el cambio:
 	char *nameMasAlta =
 			programList[processTable[indexMasAlta].programListIndex]->executableName;
 	char *name =
@@ -660,15 +739,15 @@ void OperatingSystem_TransferWithEcualPriority() {
 	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
 	ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, executingProcessID,
 			name, indexMasAlta, nameMasAlta);
-	//Quitar el procesador al proceso actual:
+//Quitar el procesador al proceso actual:
 	OperatingSystem_PreemptRunningProcess();
-	//Dar el procesador al siguiente proceso:
+//Dar el procesador al siguiente proceso:
 	OperatingSystem_Dispatch(indexMasAlta);
 
-	//Sacar de la readyToRun al proceso actual
+//Sacar de la readyToRun al proceso actual
 	OperatingSystem_ExtractFromReadyToRun(IDActual);
 
-	//Ejercicio V2.7
+//Ejercicio V2.7
 	OperatingSystem_PrintStatus();
 
 }
@@ -682,7 +761,7 @@ void OperatingSystem_HandleClockInterrupt() {
 	ComputerSystem_DebugMessage(120, INTERRUPT, numberOfClockInterrupts);
 	numberOfClockInterrupts = numberOfClockInterrupts + 1;
 
-	//Ejercicio V3.3
+//Ejercicio V3.3
 	int Ready_Antes = numberOfReadyToRunProcesses[0];
 	OperatingSystem_WakeUpProcesses();
 	OperatingSystem_LongTermScheduler();
@@ -699,16 +778,16 @@ void OperatingSystem_HandleClockInterrupt() {
  * Modificado: V2.5
  */
 void OperatingSystem_Dormir_Proceso_Actual() {
-	//Calcular el whenToWakeUp
+//Calcular el whenToWakeUp
 	processTable[executingProcessID].whenToWakeUp =
 			OperatingSystem_GetWhenToWakeUp();
-	// Guardar el estado del proceso
+// Guardar el estado del proceso
 	OperatingSystem_SaveContext(executingProcessID);
-	// Añadir el proceso a la sleepingProcessesQueue
+// Añadir el proceso a la sleepingProcessesQueue
 	OperatingSystem_MoveToTheSleepingProcessesQueue(executingProcessID);
-	// Select the next process to execute (sipID if no more user processes)
+// Select the next process to execute (sipID if no more user processes)
 	int selectedProcess = OperatingSystem_ShortTermScheduler();
-	// Assign the processor to that process
+// Assign the processor to that process
 	OperatingSystem_Dispatch(selectedProcess);
 }
 
@@ -780,7 +859,7 @@ int OperatingSystem_ExtractFromSleepingQueue(int queueID) {
 void OperatingSystem_CambiarProcesoAlMasPrioritario() {
 	int IDActual = executingProcessID;
 	int prioridadActual = processTable[executingProcessID].priority;
-	//Localizar proceso para cambiar:
+//Localizar proceso para cambiar:
 	int indexMasAlta = -1;
 	int prioridadMasAlta = -1;
 	int i = 0;
@@ -795,7 +874,7 @@ void OperatingSystem_CambiarProcesoAlMasPrioritario() {
 	if (prioridadMasAlta <= prioridadActual) {
 		return;
 	}
-	//Imprimir el cambio:
+//Imprimir el cambio:
 	char *nameMasAlta =
 			programList[processTable[indexMasAlta].programListIndex]->executableName;
 	char *name =
@@ -803,12 +882,12 @@ void OperatingSystem_CambiarProcesoAlMasPrioritario() {
 	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
 	ComputerSystem_DebugMessage(121, SHORTTERMSCHEDULE, executingProcessID,
 			name, indexMasAlta, nameMasAlta);
-	//Quitar el procesador al proceso actual:
+//Quitar el procesador al proceso actual:
 	OperatingSystem_PreemptRunningProcess();
-	//Dar el procesador al siguiente proceso:
+//Dar el procesador al siguiente proceso:
 	OperatingSystem_Dispatch(indexMasAlta);
 
-	//Sacar de la readyToRun al proceso actual
+//Sacar de la readyToRun al proceso actual
 	OperatingSystem_ExtractFromReadyToRun(IDActual);
 }
 
