@@ -39,7 +39,6 @@ int OperatingSystem_GetWhenToWakeUp();
 void OperatingSystem_CambiarProcesoAlMasPrioritario();
 void Test(char const *cadena, int numero);
 
-
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
 
@@ -548,6 +547,14 @@ void OperatingSystem_InterruptLogic(int entryPoint) {
 		break;
 	case CLOCKINT_BIT: // CLOCKINT_BIT=9
 		OperatingSystem_HandleClockInterrupt();
+		break;
+	default:
+		OperatingSystem_ShowTime(INTERRUPT);
+		ComputerSystem_DebugMessage(141, INTERRUPT, executingProcessID,
+				programList[processTable[executingProcessID].programListIndex]->executableName,
+				entryPoint);
+		OperatingSystem_TerminateProcess(); //TODO
+		OperatingSystem_PrintStatus();
 		break;
 	}
 }

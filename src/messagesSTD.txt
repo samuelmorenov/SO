@@ -45,3 +45,6 @@
 
 //Ejercicio 4.2
 140, Process [@R%d - %s@@] has caused an exception (@R%s@@) and is being terminated
+
+//Ejercicio 4.4
+141, Process [@R%d - %s@@] has made an invalid system call (@R%ds@@) and is being terminated
