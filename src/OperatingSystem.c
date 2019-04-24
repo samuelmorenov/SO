@@ -363,8 +363,16 @@ int OperatingSystem_BestPartition(int processSize) {
  * Libera la memoria del proceso executingProcessID
  * Creado: v4.7
  */
-void OperatingSystem_ReleaseMainMemory(){
+void OperatingSystem_ReleaseMainMemory() {
+	int currentPartition = 0;
+	//TODO: 4.7
+	for (currentPartition = 0; currentPartition < PARTITIONTABLEMAXSIZE;
+			currentPartition++) {
+		if(partitionsTable[currentPartition].PID == executingProcessID){
+			partitionsTable[currentPartition].occupied = 0;
+		}
 
+	}
 }
 
 // Assign initial values to all fields inside the PCB
@@ -578,8 +586,6 @@ void OperatingSystem_TerminateProcess() {
 // Assign the processor to that process
 	OperatingSystem_Dispatch(selectedProcess);
 }
-
-
 
 // System call management routine
 /**
