@@ -258,18 +258,15 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 		return priority;
 
 	/////////////////////////////////////
-	//TODO:
-	Test("test",0);
+	//TODO: Ejercicio 6
+
 	// Obtain enough memory space
 	int partition = OperatingSystem_ObtainMainMemory(processSize, PID);
 	if (partition == TOOBIGPROCESS || partition == MEMORYFULL) {
-		Test("test",1);
 		return partition;
 	}
-	Test("test",2);
 	loadingPhysicalAddress = partitionsTable[partition].initAddress;
 	int partitionSize = partitionsTable[partition].size;
-
 	// Load program in the allocated memory
 	if (OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress,
 			processSize) == TOOBIGPROCESS)
@@ -278,18 +275,13 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	OperatingSystem_PCBInitialization(PID, loadingPhysicalAddress, processSize,
 			priority, indexOfExecutableProgram);
 	// Show message "Process [PID] created from program [executableName]\n"
-	Test("test",3);
-	/////////////////////////////////////
-
 	OperatingSystem_ShowTime(INIT);
 	ComputerSystem_DebugMessage(22, INIT, PID,
 			executableProgram->executableName);
 
-	//TODO:
 	OperatingSystem_ShowTime(SYSMEM);
-	ComputerSystem_DebugMessage(22, SYSMEM, partition, loadingPhysicalAddress,
-			partitionSize, PID, executableProgram->executableName);
-	Test("test",4);
+	//ComputerSystem_DebugMessage(22, SYSMEM, partition, loadingPhysicalAddress, partitionSize, PID, executableProgram->executableName); //TODO
+
 	return PID;
 }
 
@@ -311,7 +303,7 @@ int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 
 	int bestPartition = OperatingSystem_BestPartition(processSize);
 
-	if (!(bestPartition != TOOBIGPROCESS || bestPartition == MEMORYFULL)) {
+	if (!(bestPartition == TOOBIGPROCESS || bestPartition == MEMORYFULL)) {
 
 		partitionsTable[bestPartition].occupied = 1;
 		partitionsTable[bestPartition].PID = PID;
@@ -365,6 +357,14 @@ int OperatingSystem_BestPartition(int processSize) {
 		return MEMORYFULL;
 	}
 	return bestPartition;
+}
+
+/**
+ * Libera la memoria del proceso executingProcessID
+ * Creado: v4.7
+ */
+void OperatingSystem_ReleaseMainMemory(){
+
 }
 
 // Assign initial values to all fields inside the PCB
@@ -557,6 +557,8 @@ void OperatingSystem_HandleException(int excepcion) { //char const *tipo) {
 // All tasks regarding the removal of the process
 void OperatingSystem_TerminateProcess() {
 
+	OperatingSystem_ReleaseMainMemory();
+
 	int selectedProcess;
 	int anterior = processTable[executingProcessID].state;
 	processTable[executingProcessID].state = EXIT;
@@ -576,6 +578,8 @@ void OperatingSystem_TerminateProcess() {
 // Assign the processor to that process
 	OperatingSystem_Dispatch(selectedProcess);
 }
+
+
 
 // System call management routine
 /**
