@@ -85,6 +85,10 @@ int numberOfClockInterrupts = 0;
 int sleepingProcessesQueue[PROCESSTABLEMAXSIZE];
 int numberOfSleepingProcesses = 0;
 
+//Ejercicio V5.2
+int IOWaitingProcessesQueue[PROCESSTABLEMAXSIZE];
+int numberOfIOWaitingProcesses = 0;
+
 // Initial set of tasks of the OS
 /**
  * Inicializa el sistema operativo
@@ -258,7 +262,7 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 		return priority;
 
 	/////////////////////////////////////
-	//TODO: Ejercicio 6
+	//TODO: Ejercicio 4.6
 
 	// Obtain enough memory space
 	int partition = OperatingSystem_ObtainMainMemory(processSize, PID);
@@ -280,7 +284,7 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 			executableProgram->executableName);
 
 	OperatingSystem_ShowTime(SYSMEM);
-	//ComputerSystem_DebugMessage(22, SYSMEM, partition, loadingPhysicalAddress, partitionSize, PID, executableProgram->executableName); //TODO
+	//ComputerSystem_DebugMessage(22, SYSMEM, partition, loadingPhysicalAddress, partitionSize, PID, executableProgram->executableName); //TODO Ejercicio 4.6
 
 	return PID;
 }
@@ -292,7 +296,6 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
  * Modificado: 4.6
  */
 int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
-	//TODO:
 	/*
 	 * Modifica la función OperatingSystem_ObtainMainMemory()para que elija una par-tición
 	 * para el proceso siguiendo la política (estrategia) del mejor ajuste; si hubiese
@@ -357,22 +360,6 @@ int OperatingSystem_BestPartition(int processSize) {
 		return MEMORYFULL;
 	}
 	return bestPartition;
-}
-
-/**
- * Libera la memoria del proceso executingProcessID
- * Creado: v4.7
- */
-void OperatingSystem_ReleaseMainMemory() {
-	int currentPartition = 0;
-	//TODO: 4.7
-	for (currentPartition = 0; currentPartition < PARTITIONTABLEMAXSIZE;
-			currentPartition++) {
-		if(partitionsTable[currentPartition].PID == executingProcessID){
-			partitionsTable[currentPartition].occupied = 0;
-		}
-
-	}
 }
 
 // Assign initial values to all fields inside the PCB
@@ -629,6 +616,10 @@ void OperatingSystem_HandleSystemCall() {
 }
 
 //	Implement interrupt logic calling appropriate interrupt handle
+/**
+ * Llama al manejador de interrupciones correspondiente
+ * Modificado: 4.6
+ */
 void OperatingSystem_InterruptLogic(int entryPoint) {
 	switch (entryPoint) {
 	case SYSCALL_BIT: // SYSCALL_BIT=2
@@ -640,24 +631,27 @@ void OperatingSystem_InterruptLogic(int entryPoint) {
 	case CLOCKINT_BIT: // CLOCKINT_BIT=9
 		OperatingSystem_HandleClockInterrupt();
 		break;
+	case IOEND_BIT: //IOEND_BIT=8
+		OperatingSystem_HandleIOEndInterrupt(); //TODO V5.1
+		break;
 	default:
 		OperatingSystem_ShowTime(INTERRUPT);
 		ComputerSystem_DebugMessage(141, INTERRUPT, executingProcessID,
 				programList[processTable[executingProcessID].programListIndex]->executableName,
 				entryPoint);
-		OperatingSystem_TerminateProcess(); //TODO
+		OperatingSystem_TerminateProcess(); //TODO Ejercicio 4.6
 		OperatingSystem_PrintStatus();
 		break;
 	}
 }
 
 void Test(char const *cadena, int numero) {
-#define ANSI_COLOR_BLUE "\x1b[34m"
-#define ANSI_COLOR_RESET "\x1b[0m"
+//#define ANSI_COLOR_BLUE "\x1b[34m"
+//#define ANSI_COLOR_RESET "\x1b[0m"
 	char chr;
-	printf(ANSI_COLOR_BLUE);
+	printf("\x1b[34m");
 	printf("\t%s %d >>", cadena, numero);
-	printf(ANSI_COLOR_RESET);
+	printf("\x1b[0m");
 	scanf("%c", &chr);
 }
 
@@ -669,23 +663,6 @@ void OperatingSystem_PrintReadyToRunQueue() {
 
 	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
 	ComputerSystem_DebugMessage(106, SHORTTERMSCHEDULE);
-
-//	int j = 0;
-//	for (j = 0; j < 2; j++) {
-//		ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[j]);
-//		for (i = 0; i < numberOfReadyToRunProcesses[j]; i++) {
-//			int identificador = readyToRunQueue[j][i];
-//			int prioridad = processTable[identificador].priority;
-//			if (i == 0) {
-//				ComputerSystem_DebugMessage(113, SHORTTERMSCHEDULE,
-//						identificador, prioridad);
-//			} else {
-//				ComputerSystem_DebugMessage(108, SHORTTERMSCHEDULE,
-//						identificador, prioridad);
-//			}
-//		}
-//		ComputerSystem_DebugMessage(109, SHORTTERMSCHEDULE);
-//	}
 
 	int i = 0;
 	ComputerSystem_DebugMessage(112, SHORTTERMSCHEDULE, queueNames[0]);
@@ -907,4 +884,53 @@ void OperatingSystem_CambiarProcesoAlMasPrioritario() {
  */
 int OperatingSystem_GetExecutingProcessID() {
 	return executingProcessID;
+}
+/**
+ * Libera la memoria del proceso executingProcessID
+ * Creado: v4.7
+ */
+void OperatingSystem_ReleaseMainMemory() {
+	int currentPartition = 0;
+	//TODO: Ejercicio 4.7
+	for (currentPartition = 0; currentPartition < PARTITIONTABLEMAXSIZE;
+			currentPartition++) {
+		if (partitionsTable[currentPartition].PID == executingProcessID) {
+			partitionsTable[currentPartition].occupied = 0;
+		}
+
+	}
+}
+
+/**
+ * Rutina del SO de tratamiento de interrupciones de fin de entrada/salida
+ * Creado V5.1
+ */
+void OperatingSystem_HandleIOEndInterrupt() {
+
+}
+
+/**
+ * Manejador independiente del dispositivo
+ * Creado V5.2
+ */
+void OperatingSystem_IOScheduler() {
+	/**
+	 * 1 Al recibir una peticion de E/S desde la rutina de tratamiento de llamadas al sistema (TRAP 1),
+	 * 2 Añade la peticion en la cola de peticiones asociadas al dispositivo.
+	 * 3 Avisa al manejador dependiente del dispositivo de que hay una nueva peticion.
+	 */
+	QueueFIFO_add(executingProcessID, IOWaitingProcessesQueue, numberOfIOWaitingProcesses, PROCESSTABLEMAXSIZE); //Para añadir al final de la cola.
+	OperatingSystem_DeviceControlerStartIOOperation();
+}
+
+void OperatingSystem_DeviceControlerStartIOOperation(){//int valueToPrint) {
+	//Si el dispositivo está libre, la información que debe enviar al dispositivo para
+	//que la muestre (Device_StartIO(value)) será el PID del proceso que solicita la operación.
+	if(Device_GetStatus == FREE){
+		Device_StartIO(QueueFIFO_getFirst(IOWaitingProcessesQueue, numberOfIOWaitingProcesses));
+	}
+
+}
+int OperatingSystem_DeviceControlerEndIOOperation() {
+
 }

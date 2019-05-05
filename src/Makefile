@@ -13,8 +13,8 @@ INCLUDES =
 LIBRERIAS =
 ACC = /usr/share/ACC/bin/acc
 
-${PROGRAM}: Simulator.o Aspect.o Asserts.o Buses.o Clock.o ComputerSystem.o ComputerSystemBase.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystemAspect.o OperatingSystemBase.o ProcessorAspect.o ProcessorBase.o
-	$(CC) -o ${PROGRAM} Simulator.o Aspect.o Asserts.o Buses.o Clock.o ComputerSystem.o ComputerSystemBase.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystemAspect.o OperatingSystemBase.o ProcessorAspect.o ProcessorBase.o $(LIBRERIAS)
+${PROGRAM}: Simulator.o Aspect.o Asserts.o Buses.o Clock.o ComputerSystem.o ComputerSystemBase.o Device.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystemAspect.o OperatingSystemBase.o ProcessorAspect.o ProcessorBase.o QueueFIFO.o
+	$(CC) -o ${PROGRAM} Simulator.o Aspect.o Asserts.o Buses.o Clock.o ComputerSystem.o ComputerSystemBase.o Device.o Heap.o MainMemory.o Messages.o MMU.o OperatingSystemAspect.o OperatingSystemBase.o ProcessorAspect.o ProcessorBase.o QueueFIFO.o $(LIBRERIAS)
 
 Simulator.o: Simulator.c Simulator.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) Simulator.c
@@ -41,6 +41,9 @@ ComputerSystem.o: ComputerSystem.c ComputerSystem.h ComputerSystemBase.h
 ComputerSystemBase.o: ComputerSystemBase.c ComputerSystemBase.h ComputerSystem.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) ComputerSystemBase.c
 
+Device.o: Device.c Device.h
+	$(CC) $(STDCFLAGS) $(INCLUDES) Device.c	
+	
 Heap.o: Heap.c Heap.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) Heap.c
 
@@ -73,5 +76,8 @@ ProcessorAspect.mc: Processor.c Processor.h ProcessorBase.c ProcessorBase.h
 ProcessorBase.o: ProcessorBase.c ProcessorBase.h Processor.h
 	$(CC) $(STDCFLAGS) $(INCLUDES) ProcessorBase.c
 
+QueueFIFO.o: QueueFIFO.c QueueFIFO.h
+	$(CC) $(STDCFLAGS) $(INCLUDES) QueueFIFO.c
+	
 clean:
 	rm -f $(PROGRAM) *.o *~ *.mc *.acc Aspect.c ProcessorAspect.c OperatingSystemAspect.c core

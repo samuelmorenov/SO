@@ -25,6 +25,12 @@
 41,\t\t[@G%d@@] [@G%d@@ -> @G%d@@]
 42,[@G%d - %s@@]\n
 43,[@G%s@@]\n
+50,@M[@G%s@M] starting Input/Output operation. Output value [@G%d@M]@@\n
+51,Input/Output Queue:\n\t\t
+52,[@G%d@@]
+53,@M ****** Device [@G%s@M] END Process I/O with data [@G%d@M] ******@@\n
+54,@M ****** Device [@G%s@M] initialized with I/O time of [@G%d@M] tics ******@@\n
+
 
 // Message system messages
 60,Illegal Message Number in line @R%d@@ of file @R%s@@\n

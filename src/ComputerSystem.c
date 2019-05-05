@@ -21,6 +21,9 @@ int numberOfProgramsInArrivalTimeQueue=0;
 // Powers on of the Computer System.
 void ComputerSystem_PowerOn(int argc, char *argv[]) {
 
+	//TODO V5.3
+	Device_Initialize ("OutputDevice-2019", 7);
+
 	// Load debug messages
 	int nm=0;
 	nm=Messages_Load_Messages(nm,TEACHER_MESSAGES_FILE);

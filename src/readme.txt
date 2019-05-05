@@ -1,1 +1,1 @@
-Realizado ejercicio 5. He hecho el 6, pero falla, aun tengo que depurarlo
+He hecho los ejercicios 1, 2, 3, y 4.a, aunque aun no he podido ver sin funciona

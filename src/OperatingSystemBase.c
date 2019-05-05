@@ -16,16 +16,22 @@ int OperatingSystem_lineBeginsWithANumber(char *);
 void OperatingSystem_PrintSleepingProcessQueue();
 void OperatingSystem_PrintExecutingProcessInformation();
 void OperatingSystem_PrintProcessTableAssociation();
+void OperatingSystem_PrintIOQueue();
 
 #ifdef MEMCONFIG
 PARTITIONDATA partitionsTable[PARTITIONTABLEMAXSIZE];
+#endif
+
+#ifdef DEVICE
+	extern int IOWaitingProcessesQueue[PROCESSTABLEMAXSIZE];
+	extern int numberOfIOWaitingProcesses; 
 #endif
 
 extern int executingProcessID;
 #ifdef SLEEPINGQUEUE
 	extern char * queueNames []; 
 #endif
-	
+
 // Search for a free entry in the process table. The index of the selected entry
 // will be used as the process identifier
 int OperatingSystem_ObtainAnEntryInTheProcessTable() {
@@ -209,6 +215,7 @@ void OperatingSystem_PrintStatus(){
 	OperatingSystem_PrintSleepingProcessQueue(); // Show Sleeping process queue
 	OperatingSystem_PrintProcessTableAssociation(); // Show PID-Program's name association
 	ComputerSystem_PrintArrivalTimeQueue(); // Show arrival queue of programs
+	OperatingSystem_PrintIOQueue(); // Show FIFO queue of IO requests
 }
 
  // Show Executing process information
@@ -378,5 +385,27 @@ void OperatingSystem_ShowPartitionTable(char *mensaje) {
 		else
 			ComputerSystem_DebugMessage(43,SYSMEM,"AVAILABLE");
 	}
+#endif
+}
+
+// Show IOWaitingProcessesQueue 
+void OperatingSystem_PrintIOQueue(){ 
+#ifdef DEVICE
+
+	int i;
+	OperatingSystem_ShowTime(DEVICE);
+	//  Show message "Input/Output Queue:\n\t\t");
+	ComputerSystem_DebugMessage(51,DEVICE);
+	if (numberOfIOWaitingProcesses>0)
+		for (i=0; i< numberOfIOWaitingProcesses; i++) {
+			// Show message [PID]
+			ComputerSystem_DebugMessage(52,DEVICE,IOWaitingProcessesQueue[i]);
+			if (i<numberOfIOWaitingProcesses-1)
+	  			ComputerSystem_DebugMessage(98,DEVICE,", ");
+  		}
+  	else 
+	  	ComputerSystem_DebugMessage(98,DEVICE,"[--- empty queue ---]");
+  ComputerSystem_DebugMessage(98,DEVICE,"\n");
+  
 #endif
 }

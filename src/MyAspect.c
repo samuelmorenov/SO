@@ -1,13 +1,14 @@
 #include "Clock.h"
 #include "Asserts.h"
 #include "OperatingSystemBase.h"
-
+#include "Device.h"
 
 before(): execution(int Processor_FetchInstruction()) {
 	Clock_Update();
 }
 
 after(): execution(void Processor_DecodeAndExecuteInstruction()){
+	Device_UpdateStatus();
     Asserts_CheckAsserts();
 }
 
