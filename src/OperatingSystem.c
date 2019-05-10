@@ -36,7 +36,7 @@ void OperatingSystem_WakeUpProcesses();
 int OperatingSystem_ExtractFromSleepingQueue(int queueID);
 void OperatingSystem_Dormir_Proceso_Actual();
 int OperatingSystem_GetWhenToWakeUp();
-void OperatingSystem_CambiarProcesoAlMasPrioritario();
+int OperatingSystem_CambiarProcesoAlMasPrioritario();
 int OperatingSystem_BestPartition(int processSize);
 void Test(char const *cadena, int numero);
 
@@ -633,14 +633,10 @@ void OperatingSystem_InterruptLogic(int entryPoint) {
 		break;
 	case IOEND_BIT: //IOEND_BIT=8
 		OperatingSystem_HandleIOEndInterrupt(); //TODO V5.1
+		//OperatingSystem_DeviceControlerEndIOOperation(); //TODO V5.4.b ya se llama en el procedimiento de antes
 		break;
 	default:
-		OperatingSystem_ShowTime(INTERRUPT);
-		ComputerSystem_DebugMessage(141, INTERRUPT, executingProcessID,
-				programList[processTable[executingProcessID].programListIndex]->executableName,
-				entryPoint);
-		OperatingSystem_TerminateProcess(); //TODO Ejercicio 4.6
-		OperatingSystem_PrintStatus();
+		OperatingSystem_InvalidSystemCall(entryPoint);
 		break;
 	}
 }
@@ -653,6 +649,19 @@ void Test(char const *cadena, int numero) {
 	printf("\t%s %d >>", cadena, numero);
 	printf("\x1b[0m");
 	scanf("%c", &chr);
+}
+
+/**
+ * Muestra un error cuando una llamada al sistema realizada por un proceso de usuario no sea reconocida como llamada al sistema válida
+ * Creado: V4.4
+ */
+void OperatingSystem_InvalidSystemCall(int entryPoint){
+	OperatingSystem_ShowTime(INTERRUPT);
+	ComputerSystem_DebugMessage(141, INTERRUPT, executingProcessID,
+			programList[processTable[executingProcessID].programListIndex]->executableName,
+			entryPoint);
+	OperatingSystem_TerminateProcess(); //TODO Ejercicio 4.6
+	OperatingSystem_PrintStatus();
 }
 
 /**
@@ -843,7 +852,7 @@ int OperatingSystem_ExtractFromSleepingQueue(int queueID) {
  * Cambia el proceso en ejecucion por el que tenga la prioridad mas alta
  * Modificado: V2.6
  */
-void OperatingSystem_CambiarProcesoAlMasPrioritario() {
+int OperatingSystem_CambiarProcesoAlMasPrioritario() {
 	int IDActual = executingProcessID;
 	int prioridadActual = processTable[executingProcessID].priority;
 //Localizar proceso para cambiar:
@@ -859,7 +868,7 @@ void OperatingSystem_CambiarProcesoAlMasPrioritario() {
 		}
 	}
 	if (prioridadMasAlta <= prioridadActual) {
-		return;
+		return 0;
 	}
 //Imprimir el cambio:
 	char *nameMasAlta =
@@ -876,6 +885,8 @@ void OperatingSystem_CambiarProcesoAlMasPrioritario() {
 
 //Sacar de la readyToRun al proceso actual
 	OperatingSystem_ExtractFromReadyToRun(IDActual);
+
+	return 1;
 }
 
 /**
@@ -903,10 +914,39 @@ void OperatingSystem_ReleaseMainMemory() {
 
 /**
  * Rutina del SO de tratamiento de interrupciones de fin de entrada/salida
- * Creado V5.1
+ * Modificado V5.5
  */
 void OperatingSystem_HandleIOEndInterrupt() {
+	//TODO V5.5
 
+	//a. Pedir al manejador dependiente del dispositivo que se disponga a
+	//gestionar la siguiente petición pendiente.
+	int PID = OperatingSystem_DeviceControlerEndIOOperation();
+
+
+	//b. Desbloquear al proceso cuya entrada/salida ha finalizado. Como
+	//hay cambio de estado de procesos, hay que sacar los mensajes de cambio de
+	//estado pertinentes y como implica cambios en las colas, se debe hacer una
+	//llamada a OperatingSystem_PrintStatus()
+
+	//int IOWaitingProcessesQueue[PROCESSTABLEMAXSIZE];
+	//int numberOfIOWaitingProcesses = 0;
+	int anterior = processTable[PID].state;
+	processTable[PID].state = READY;
+	OperatingSystem_Print_Cambio_Estado(executingProcessID, anterior, "READY");
+	OperatingSystem_PrintStatus();
+
+	//Heap_poll(IOWaitingProcessesQueue, QUEUE_WAKEUP,& numberOfIOWaitingProcesses); //TODO no se si es QUEUE_WAKEUP
+
+
+
+
+	//c. Requisar el procesador al proceso en ejecución si fuese necesario,
+	//en cuyo caso se llamaría a OperatingSystem_PrintStatus()
+
+	if(OperatingSystem_CambiarProcesoAlMasPrioritario() == 1){
+		OperatingSystem_PrintStatus();
+	}
 }
 
 /**
@@ -919,18 +959,45 @@ void OperatingSystem_IOScheduler() {
 	 * 2 Añade la peticion en la cola de peticiones asociadas al dispositivo.
 	 * 3 Avisa al manejador dependiente del dispositivo de que hay una nueva peticion.
 	 */
-	QueueFIFO_add(executingProcessID, IOWaitingProcessesQueue, numberOfIOWaitingProcesses, PROCESSTABLEMAXSIZE); //Para añadir al final de la cola.
+
+	QueueFIFO_add(executingProcessID, IOWaitingProcessesQueue,
+			numberOfIOWaitingProcesses, PROCESSTABLEMAXSIZE); //Para añadir al final de la cola.
+	//TODO V5.4.a
 	OperatingSystem_DeviceControlerStartIOOperation();
 }
 
-void OperatingSystem_DeviceControlerStartIOOperation(){//int valueToPrint) {
+/**
+ * Manejador Demendiente del dispositivo Parte 1
+ * Modificado V5.4.a
+ */
+void OperatingSystem_DeviceControlerStartIOOperation() {//int valueToPrint) {
 	//Si el dispositivo está libre, la información que debe enviar al dispositivo para
 	//que la muestre (Device_StartIO(value)) será el PID del proceso que solicita la operación.
-	if(Device_GetStatus == FREE){
-		Device_StartIO(QueueFIFO_getFirst(IOWaitingProcessesQueue, numberOfIOWaitingProcesses));
+	if (Device_GetStatus == FREE) { //TODO V5.4.a
+		Device_StartIO(
+				QueueFIFO_getFirst(IOWaitingProcessesQueue,
+						numberOfIOWaitingProcesses));
 	}
 
 }
-int OperatingSystem_DeviceControlerEndIOOperation() {
 
+/**
+ * Manejador Demendiente del dispositivo Parte 2
+ * Modificado V5.4.b
+ */
+int OperatingSystem_DeviceControlerEndIOOperation() {
+	//Se encargará de gestionar la siguiente petición de la cola, en el caso de que exista.
+	//Devuelve el PID del proceso que ha terminado su operación de E/S
+	//TODO V5.4.b
+
+
+	//int IOWaitingProcessesQueue[PROCESSTABLEMAXSIZE];
+	//int numberOfIOWaitingProcesses = 0;
+
+	int PID = 0; //TODO <<<<<<<<< no se que poner aqui
+
+	if(numberOfIOWaitingProcesses != 0){
+		Device_StartIO(QueueFIFO_getFirst(IOWaitingProcessesQueue,numberOfIOWaitingProcesses));
+	}
+	return PID;
 }
