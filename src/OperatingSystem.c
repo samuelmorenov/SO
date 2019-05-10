@@ -611,6 +611,8 @@ void OperatingSystem_HandleSystemCall() {
 		//Ejercicio 5
 		OperatingSystem_Dormir_Proceso_Actual();
 		break;
+	case SYSCALL_IO:
+		OperatingSystem_EntradaSalida();
 
 	}
 }
@@ -787,6 +789,8 @@ void OperatingSystem_Dormir_Proceso_Actual() {
 	OperatingSystem_Dispatch(selectedProcess);
 }
 
+
+
 int OperatingSystem_GetWhenToWakeUp() {
 	int acumulador = Processor_GetAccumulator(); // valor actual del registro acumulador
 	if (acumulador < 0)
@@ -936,7 +940,7 @@ void OperatingSystem_HandleIOEndInterrupt() {
 	OperatingSystem_Print_Cambio_Estado(executingProcessID, anterior, "READY");
 	OperatingSystem_PrintStatus();
 
-	//Heap_poll(IOWaitingProcessesQueue, QUEUE_WAKEUP,& numberOfIOWaitingProcesses); //TODO no se si es QUEUE_WAKEUP
+	//Heap_poll(IOWaitingProcessesQueue, QUEUE_WAKEUP,&numberOfIOWaitingProcesses); //TODO no se si es QUEUE_WAKEUP
 
 
 
@@ -1000,4 +1004,30 @@ int OperatingSystem_DeviceControlerEndIOOperation() {
 		Device_StartIO(QueueFIFO_getFirst(IOWaitingProcessesQueue,numberOfIOWaitingProcesses));
 	}
 	return PID;
+}
+
+
+/**
+ * Es utilizada por los procesos de usuario para realizar entrada/salida sobre el dispositivo
+ * Modificado V5.6
+ */
+void OperatingSystem_EntradaSalida(){
+	//a. Bloquear al proceso que realiza la llamada. Como hay cambio de estado
+	//se debe mostrar el mensaje de cambio de estado pertinente.
+	int PID = executingProcessID;
+	OperatingSystem_SaveContext(PID);
+	if (Heap_add(PID, IOWaitingProcessesQueue, processTable[PID].queueID,
+			&numberOfIOWaitingProcesses, PROCESSTABLEMAXSIZE) >= 0) {
+		int anterior = processTable[PID].state;
+		processTable[PID].state = BLOCKED;
+		OperatingSystem_Print_Cambio_Estado(PID, anterior, "BLOCKED");
+	}
+
+	//b. Invocar al manejador independiente del dispositivo para que se ponga en marcha la operación.
+	OperatingSystem_DeviceControlerStartIOOperation();
+
+
+	//c. Hacer una llamada a OperatingSystem_PrintStatus()
+	OperatingSystem_PrintStatus();
+
 }

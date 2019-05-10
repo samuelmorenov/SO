@@ -37,7 +37,7 @@ enum ProcessStates { NEW, READY, EXECUTING, BLOCKED, EXIT};
 // Enumerated type containing the list of system calls and their numeric identifiers
 //Ejercicio 12
 //Ejercicio 5 Añade una nueva llamada al sistema SYSCALL_SLEEP=7 que bloqueará al proceso en ejecución (es decir, se tendrá que mover al estado BLOCKED) y lo insertará por orden creciente del campo whenToWakeUp en la sleepingProcessesQueue.
-enum SystemCallIdentifiers { SYSCALL_END=3, SYSCALL_PRINTEXECPID=5, SYSCALL_YIELD=4, SYSCALL_SLEEP=7};
+enum SystemCallIdentifiers { SYSCALL_END=3, SYSCALL_PRINTEXECPID=5, SYSCALL_YIELD=4, SYSCALL_SLEEP=7, SYSCALL_IO=1};
 
 //Ejercicio 11 - 0/Enunciado
 #define NUMBEROFQUEUES 2
