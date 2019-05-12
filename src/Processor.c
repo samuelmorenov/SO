@@ -24,7 +24,7 @@ int registerMAR_CPU; // Memory Address Register
 MEMORYCELL registerMBR_CPU; // Memory Buffer Register
 
 int registerA_CPU; // General purpose register
-int registerB_CPU; // Another general purpose register Exercise 1-a of TODO V4.1.a
+int registerB_CPU; // Another general purpose register Exercise 1-a of V4.1.a
 
 int interruptLines_CPU; // Processor interrupt lines
 
@@ -304,7 +304,7 @@ char * Processor_ShowPSW() {
 /////////////////////////////////////////////////////////
 //  New functions below this line  //////////////////////
 
-// Function to raise an exception. Ejercicio TODO V4.1.c
+// Function to raise an exception. Ejercicio V4.1.c
 void Processor_RaiseException(int typeOfException) {
 	Processor_RaiseInterrupt(EXCEPTION_BIT);
 	registerB_CPU = typeOfException;

@@ -43,7 +43,7 @@ enum SystemCallIdentifiers { SYSCALL_END=3, SYSCALL_PRINTEXECPID=5, SYSCALL_YIEL
 #define NUMBEROFQUEUES 2
 enum ReadyToRunProcessQueues { USERPROCESSQUEUE, DAEMONSQUEUE };
 
-//Ejercicio TODO V4.5
+//Ejercicio V4.5
 // Partitions configuration file name definition
 #define MEMCONFIG "MemConfig"  // in OperatingSystem.h
 

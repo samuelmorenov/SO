@@ -23,7 +23,7 @@ int MMU_readMemory() {
 			MainMemory_readMemory();
 			return MMU_SUCCESS;
 		} else {
-			Processor_RaiseException(INVALIDADDRESS);//Ejercicio TODO V4.1.d
+			Processor_RaiseException(INVALIDADDRESS);//Ejercicio V4.1.d
 			return MMU_FAIL;
 		}
 	} else // Non-Protected mode
@@ -36,7 +36,7 @@ int MMU_readMemory() {
 		MainMemory_readMemory();
 		return MMU_SUCCESS;
 	} else {
-		Processor_RaiseException(INVALIDADDRESS);//Ejercicio TODO V4.1.d
+		Processor_RaiseException(INVALIDADDRESS);//Ejercicio V4.1.d
 		return MMU_FAIL;
 	}
 

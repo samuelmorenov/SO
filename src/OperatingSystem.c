@@ -109,7 +109,7 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	int i, selectedProcess;
 	FILE *programFile; // For load Operating System Code
 
-	//Ejercicio TODO V4.5
+	//Ejercicio V4.5
 	OperatingSystem_InitializePartitionTable();
 
 	// Obtain the memory requirements of the program
@@ -292,7 +292,7 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	ComputerSystem_DebugMessage(22, INIT, PID,
 			executableProgram->executableName);
 
-	//Ejercicio TODO V4.6.c
+	//Ejercicio V4.6.c
 	int partitionSize = partitionsTable[partition].size;
 	OperatingSystem_ShowTime(SYSMEM);
 	ComputerSystem_DebugMessage(143, SYSMEM, partition, loadingPhysicalAddress, partitionSize, PID, executableProgram->executableName);
@@ -315,12 +315,12 @@ int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 	if (processSize > MAINMEMORYSECTIONSIZE)
 		return TOOBIGPROCESS;
 
-	//TODO V4.6.a
+	//V4.6.a
 	int bestPartition = OperatingSystem_BestPartition(processSize);
 
 	if (!(bestPartition == TOOBIGPROCESS || bestPartition == MEMORYFULL)) {
 
-		OperatingSystem_ShowPartitionTable("before allocating memory"); //TODO V4.8.a
+		OperatingSystem_ShowPartitionTable("before allocating memory"); //V4.8.a
 
 		partitionsTable[bestPartition].occupied = 1;
 		partitionsTable[bestPartition].PID = PID;
@@ -328,14 +328,14 @@ int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 		OperatingSystem_ShowTime(SYSMEM);
 		ComputerSystem_DebugMessage(142, SYSMEM, PID,
 				programList[processTable[PID].programListIndex]->executableName,
-				bestPartition); //TODO V4.6.b
+				bestPartition); //V4.6.b
 
-		OperatingSystem_ShowPartitionTable("after allocating memory"); //TODO V4.8.b
+		OperatingSystem_ShowPartitionTable("after allocating memory"); //V4.8.b
 
 
 	} else {
 		//[1] ERROR:  A  process  could  not  be  created  from  program  [acceptableSizeExample]  because an appropriate partition is not available
-		//Ejercicio TODO V4.6.d
+		//Ejercicio V4.6.d
 		OperatingSystem_ShowTime(ERROR);
 		ComputerSystem_DebugMessage(144, ERROR,
 				programList[processTable[PID].programListIndex]->executableName);
@@ -546,7 +546,7 @@ void OperatingSystem_HandleException(int excepcion) {
 // Show message "Process [executingProcessID] has generated an exception and is terminating\n"
 	OperatingSystem_ShowTime(SYSPROC);
 //ComputerSystem_DebugMessage(23, SYSPROC, executingProcessID, programList[processTable[executingProcessID].programListIndex]->executableName);
-//Ejercicio TODO V4.2
+//Ejercicio V4.2
 	char const *string;
 	switch (excepcion) {
 	case DIVISIONBYZERO:
@@ -558,7 +558,7 @@ void OperatingSystem_HandleException(int excepcion) {
 	case INVALIDADDRESS:
 		string = "invalid address";
 		break;
-	case INVALIDINSTRUCTION: //Ejercicio TODO V4.3.a
+	case INVALIDINSTRUCTION: //Ejercicio V4.3.a
 		string = "invalid instruction";
 		break;
 	}
@@ -683,9 +683,9 @@ void OperatingSystem_InvalidSystemCall(int entryPoint) {
 	OperatingSystem_ShowTime(INTERRUPT);
 	ComputerSystem_DebugMessage(141, INTERRUPT, executingProcessID,
 			programList[processTable[executingProcessID].programListIndex]->executableName,
-			entryPoint); //Ejercicio TODO V4.4.a
-	OperatingSystem_TerminateProcess(); //Ejercicio VTODO 4.4.b
-	OperatingSystem_PrintStatus(); //Ejercicio TODO V4.4.c
+			entryPoint); //Ejercicio V4.4.a
+	OperatingSystem_TerminateProcess(); //Ejercicio V4.4.b
+	OperatingSystem_PrintStatus(); //Ejercicio V4.4.c
 }
 
 /**
@@ -922,11 +922,11 @@ int OperatingSystem_GetExecutingProcessID() {
 }
 /**
  * Libera la memoria del proceso executingProcessID
- * Creado: TODO V4.7
+ * Creado: V4.7
  */
 void OperatingSystem_ReleaseMainMemory() {
 
-	OperatingSystem_ShowPartitionTable("before releasing memory"); //TODO V4.8.c
+	OperatingSystem_ShowPartitionTable("before releasing memory"); //V4.8.c
 	int currentPartition = 0;
 	for (currentPartition = 0; currentPartition < PARTITIONTABLEMAXSIZE;
 			currentPartition++) {
@@ -934,7 +934,7 @@ void OperatingSystem_ReleaseMainMemory() {
 			partitionsTable[currentPartition].occupied = 0;
 		}
 	}
-	OperatingSystem_ShowPartitionTable("after releasing memory"); //TODO V4.8.d
+	OperatingSystem_ShowPartitionTable("after releasing memory"); //V4.8.d
 
 }
 /**
