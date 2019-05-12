@@ -109,8 +109,8 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	int i, selectedProcess;
 	FILE *programFile; // For load Operating System Code
 
-	//Ejercicio V4.5
-	OperatingSystem_InitializePartitionTable();
+	//Ejercicio TODO V4.5
+	int particiones = OperatingSystem_InitializePartitionTable();
 
 	// Obtain the memory requirements of the program
 	int processSize = OperatingSystem_ObtainProgramSize(&programFile,
@@ -272,7 +272,6 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 		return priority;
 
 	/////////////////////////////////////
-	//TODO: Ejercicio 4.6
 
 	// Obtain enough memory space
 	int partition = OperatingSystem_ObtainMainMemory(processSize, PID);
@@ -293,8 +292,10 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	ComputerSystem_DebugMessage(22, INIT, PID,
 			executableProgram->executableName);
 
+	//Ejercicio TODO V4.6.c
+	int partitionSize = partitionsTable[partition].size;
 	OperatingSystem_ShowTime(SYSMEM);
-	//ComputerSystem_DebugMessage(22, SYSMEM, partition, loadingPhysicalAddress, partitionSize, PID, executableProgram->executableName); //TODO Ejercicio 4.6
+	ComputerSystem_DebugMessage(143, SYSMEM, partition, loadingPhysicalAddress, partitionSize, PID, executableProgram->executableName);
 
 	return PID;
 }
@@ -303,7 +304,7 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 // always obtains the chunk whose position in memory is equal to the processor identifier
 /**
  * Asignacion de trozos de memoria
- * Modificado: 4.6
+ * Modificado: V4.6.a
  */
 int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 	/*
@@ -314,9 +315,12 @@ int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 	if (processSize > MAINMEMORYSECTIONSIZE)
 		return TOOBIGPROCESS;
 
+	//TODO V4.6.a
 	int bestPartition = OperatingSystem_BestPartition(processSize);
 
 	if (!(bestPartition == TOOBIGPROCESS || bestPartition == MEMORYFULL)) {
+
+		OperatingSystem_ShowPartitionTable("before allocating memory"); //TODO V4.8.a
 
 		partitionsTable[bestPartition].occupied = 1;
 		partitionsTable[bestPartition].PID = PID;
@@ -324,9 +328,14 @@ int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 		OperatingSystem_ShowTime(SYSMEM);
 		ComputerSystem_DebugMessage(142, SYSMEM, PID,
 				programList[processTable[PID].programListIndex]->executableName,
-				bestPartition);
+				bestPartition); //TODO V4.6.b
+
+		OperatingSystem_ShowPartitionTable("after allocating memory"); //TODO V4.8.b
+
+
 	} else {
 		//[1] ERROR:  A  process  could  not  be  created  from  program  [acceptableSizeExample]  because an appropriate partition is not available
+		//Ejercicio TODO V4.6.d
 		OperatingSystem_ShowTime(ERROR);
 		ComputerSystem_DebugMessage(144, ERROR,
 				programList[processTable[PID].programListIndex]->executableName);
@@ -336,6 +345,10 @@ int OperatingSystem_ObtainMainMemory(int processSize, int PID) {
 
 }
 
+/*
+ * Dado un tamaño de proceso calcula la particion que le corresponde siguiendo la politica de mejor ajuste
+ * Creado: V4.6.a
+ */
 int OperatingSystem_BestPartition(int processSize) {
 	int currentPartition = 0;
 
@@ -526,14 +539,14 @@ void OperatingSystem_SaveContext(int PID) {
 // Exception management routine
 /**
  * Manejador de excepciones
- * Modificado: V2.7
+ * Modificado: V4.2
  */
-void OperatingSystem_HandleException(int excepcion) { //char const *tipo) {
+void OperatingSystem_HandleException(int excepcion) {
 
 // Show message "Process [executingProcessID] has generated an exception and is terminating\n"
 	OperatingSystem_ShowTime(SYSPROC);
 //ComputerSystem_DebugMessage(23, SYSPROC, executingProcessID, programList[processTable[executingProcessID].programListIndex]->executableName);
-//Ejercicio 4.2
+//Ejercicio TODO V4.2
 	char const *string;
 	switch (excepcion) {
 	case DIVISIONBYZERO:
@@ -545,7 +558,7 @@ void OperatingSystem_HandleException(int excepcion) { //char const *tipo) {
 	case INVALIDADDRESS:
 		string = "invalid address";
 		break;
-	case INVALIDINSTRUCTION:
+	case INVALIDINSTRUCTION: //Ejercicio TODO V4.3.a
 		string = "invalid instruction";
 		break;
 	}
@@ -657,12 +670,8 @@ void OperatingSystem_InterruptLogic(int entryPoint) {
 }
 
 void Test(char const *cadena, int numero) {
-//#define ANSI_COLOR_BLUE "\x1b[34m"
-//#define ANSI_COLOR_RESET "\x1b[0m"
 	char chr;
-	printf("\x1b[34m");
-	printf("\t%s %d >>", cadena, numero);
-	printf("\x1b[0m");
+	printf("\x1b[34m\t%s %d >>\x1b[0m", cadena, numero);
 	scanf("%c", &chr);
 }
 
@@ -674,9 +683,9 @@ void OperatingSystem_InvalidSystemCall(int entryPoint) {
 	OperatingSystem_ShowTime(INTERRUPT);
 	ComputerSystem_DebugMessage(141, INTERRUPT, executingProcessID,
 			programList[processTable[executingProcessID].programListIndex]->executableName,
-			entryPoint);
-	OperatingSystem_TerminateProcess(); //TODO Ejercicio 4.6
-	OperatingSystem_PrintStatus();
+			entryPoint); //Ejercicio TODO V4.4.a
+	OperatingSystem_TerminateProcess(); //Ejercicio VTODO 4.4.b
+	OperatingSystem_PrintStatus(); //Ejercicio TODO V4.4.c
 }
 
 /**
@@ -913,17 +922,20 @@ int OperatingSystem_GetExecutingProcessID() {
 }
 /**
  * Libera la memoria del proceso executingProcessID
- * Creado: v4.7
+ * Creado: TODO V4.7
  */
 void OperatingSystem_ReleaseMainMemory() {
+
+	OperatingSystem_ShowPartitionTable("before releasing memory"); //TODO V4.8.c
 	int currentPartition = 0;
-	//TODO: Ejercicio 4.7
 	for (currentPartition = 0; currentPartition < PARTITIONTABLEMAXSIZE;
 			currentPartition++) {
 		if (partitionsTable[currentPartition].PID == executingProcessID) {
 			partitionsTable[currentPartition].occupied = 0;
 		}
 	}
+	OperatingSystem_ShowPartitionTable("after releasing memory"); //TODO V4.8.d
+
 }
 /**
  * Es utilizada por los procesos de usuario para realizar entrada/salida sobre el dispositivo
