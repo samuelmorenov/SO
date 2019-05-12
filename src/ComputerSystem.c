@@ -7,6 +7,7 @@
 #include "Messages.h"
 #include "Asserts.h"
 #include "Clock.h"
+#include "Device.h"
 
 // Functions prototypes
 
