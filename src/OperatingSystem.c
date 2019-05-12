@@ -110,7 +110,7 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	FILE *programFile; // For load Operating System Code
 
 	//Ejercicio TODO V4.5
-	int particiones = OperatingSystem_InitializePartitionTable();
+	OperatingSystem_InitializePartitionTable();
 
 	// Obtain the memory requirements of the program
 	int processSize = OperatingSystem_ObtainProgramSize(&programFile,
