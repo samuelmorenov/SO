@@ -272,7 +272,7 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 		return priority;
 
 	/////////////////////////////////////
-	//TO-DO: Ejercicio 4.6
+	//TODO: Ejercicio 4.6
 
 	// Obtain enough memory space
 	int partition = OperatingSystem_ObtainMainMemory(processSize, PID);
@@ -294,7 +294,7 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 			executableProgram->executableName);
 
 	OperatingSystem_ShowTime(SYSMEM);
-	//ComputerSystem_DebugMessage(22, SYSMEM, partition, loadingPhysicalAddress, partitionSize, PID, executableProgram->executableName); //TO-DO Ejercicio 4.6
+	//ComputerSystem_DebugMessage(22, SYSMEM, partition, loadingPhysicalAddress, partitionSize, PID, executableProgram->executableName); //TODO Ejercicio 4.6
 
 	return PID;
 }
@@ -621,8 +621,10 @@ void OperatingSystem_HandleSystemCall() {
 		//Ejercicio 5
 		OperatingSystem_Dormir_Proceso_Actual();
 		break;
+#ifdef DEVICE
 	case SYSCALL_IO:
-		OperatingSystem_EntradaSalida(); //TODO V5.6
+		OperatingSystem_EntradaSalida(); //V5
+#endif
 
 	}
 }
@@ -643,9 +645,11 @@ void OperatingSystem_InterruptLogic(int entryPoint) {
 	case CLOCKINT_BIT: // CLOCKINT_BIT=9
 		OperatingSystem_HandleClockInterrupt();
 		break;
+#ifdef DEVICE
 	case IOEND_BIT: //IOEND_BIT=8
-		OperatingSystem_HandleIOEndInterrupt(); //TODO V5.1
+		OperatingSystem_HandleIOEndInterrupt(); //V5
 		break;
+#endif
 	default:
 		OperatingSystem_InvalidSystemCall(entryPoint);
 		break;
@@ -671,7 +675,7 @@ void OperatingSystem_InvalidSystemCall(int entryPoint) {
 	ComputerSystem_DebugMessage(141, INTERRUPT, executingProcessID,
 			programList[processTable[executingProcessID].programListIndex]->executableName,
 			entryPoint);
-	OperatingSystem_TerminateProcess(); //TO-DO Ejercicio 4.6
+	OperatingSystem_TerminateProcess(); //TODO Ejercicio 4.6
 	OperatingSystem_PrintStatus();
 }
 
@@ -866,7 +870,7 @@ int OperatingSystem_ExtractFromSleepingQueue(int queueID) {
 int OperatingSystem_CambiarProcesoAlMasPrioritario() {
 	int IDActual = executingProcessID;
 	int prioridadActual = processTable[executingProcessID].priority;
-//Localizar proceso para cambiar:
+	//Localizar proceso para cambiar:
 	int indexMasAlta = -1;
 	int prioridadMasAlta = -1;
 	int i = 0;
@@ -881,7 +885,7 @@ int OperatingSystem_CambiarProcesoAlMasPrioritario() {
 	if (prioridadMasAlta <= prioridadActual) {
 		return 0;
 	}
-//Imprimir el cambio:
+	//Imprimir el cambio:
 	char *nameMasAlta =
 			programList[processTable[indexMasAlta].programListIndex]->executableName;
 	char *name =
@@ -889,12 +893,12 @@ int OperatingSystem_CambiarProcesoAlMasPrioritario() {
 	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
 	ComputerSystem_DebugMessage(121, SHORTTERMSCHEDULE, executingProcessID,
 			name, indexMasAlta, nameMasAlta);
-//Quitar el procesador al proceso actual:
+	//Quitar el procesador al proceso actual:
 	OperatingSystem_PreemptRunningProcess();
-//Dar el procesador al siguiente proceso:
+	//Dar el procesador al siguiente proceso:
 	OperatingSystem_Dispatch(indexMasAlta);
 
-//Sacar de la readyToRun al proceso actual
+	//Sacar de la readyToRun al proceso actual
 	OperatingSystem_ExtractFromReadyToRun(IDActual);
 
 	return 1;
@@ -913,7 +917,7 @@ int OperatingSystem_GetExecutingProcessID() {
  */
 void OperatingSystem_ReleaseMainMemory() {
 	int currentPartition = 0;
-	//TO-DO: Ejercicio 4.7
+	//TODO: Ejercicio 4.7
 	for (currentPartition = 0; currentPartition < PARTITIONTABLEMAXSIZE;
 			currentPartition++) {
 		if (partitionsTable[currentPartition].PID == executingProcessID) {
@@ -921,12 +925,12 @@ void OperatingSystem_ReleaseMainMemory() {
 		}
 	}
 }
-
 /**
  * Es utilizada por los procesos de usuario para realizar entrada/salida sobre el dispositivo
  * Creado V5
  */
 void OperatingSystem_EntradaSalida(int valueToPrint) {
+#ifdef DEVICE
 	//a. Bloquear al proceso que realiza la llamada. Como hay cambio de estado
 	//se debe mostrar el mensaje de cambio de estado pertinente.
 	int PID = executingProcessID;
@@ -949,6 +953,7 @@ void OperatingSystem_EntradaSalida(int valueToPrint) {
 	int selectedProcess = OperatingSystem_ShortTermScheduler();
 	// Assign the processor to that process
 	OperatingSystem_Dispatch(selectedProcess);
+#endif
 }
 
 /**
@@ -956,6 +961,7 @@ void OperatingSystem_EntradaSalida(int valueToPrint) {
  * Creado V5
  */
 void OperatingSystem_HandleIOEndInterrupt() {
+#ifdef DEVICE
 	//a. Pedir al manejador dependiente del dispositivo que se disponga a
 	//gestionar la siguiente petición pendiente.
 	int PID = OperatingSystem_DeviceControlerEndIOOperation();
@@ -978,6 +984,7 @@ void OperatingSystem_HandleIOEndInterrupt() {
 	if (OperatingSystem_CambiarProcesoAlMasPrioritario() == 1) {
 		OperatingSystem_PrintStatus();
 	}
+#endif
 }
 
 /**
@@ -988,12 +995,14 @@ void OperatingSystem_HandleIOEndInterrupt() {
  * Creado V5
  */
 void OperatingSystem_IOScheduler(int valueToPrint, int PID) {
+#ifdef DEVICE
 	// 1. Al recibir una peticion de E/S desde la rutina de tratamiento de llamadas al sistema (TRAP 1)
 	// 2. Añade la peticion en la cola de peticiones asociadas al dispositivo.
-	QueueFIFO_add(PID, IOWaitingProcessesQueue,
-			&numberOfIOWaitingProcesses, PROCESSTABLEMAXSIZE);
+	QueueFIFO_add(PID, IOWaitingProcessesQueue, &numberOfIOWaitingProcesses,
+	PROCESSTABLEMAXSIZE);
 	// 3. Avisa al manejador dependiente del dispositivo de que hay una nueva peticion.
 	OperatingSystem_DeviceControlerStartIOOperation(valueToPrint);
+#endif
 }
 
 /**
@@ -1003,23 +1012,29 @@ void OperatingSystem_IOScheduler(int valueToPrint, int PID) {
  * el primero de la cola de solicitudes.
  * Si el dispositivo está libre, la información que debe enviar al dispositivo para
  * que la muestre (Device_StartIO(value)) será el PID del proceso que solicita la operación.
- * Creado TODO V5
+ * Creado V5
  */
 void OperatingSystem_DeviceControlerStartIOOperation(int valueToPrint) {
+#ifdef DEVICE
 	if (Device_GetStatus() == FREE) {
 		Device_StartIO(valueToPrint);
 	}
+#endif
 }
 
 /**
  * Manejador Demendiente del dispositivo Parte 2
- * Será invocada por la rutina de tratamiento de interrupciones de fin de entrada/salida
- * y se encargará de gestionar la siguiente petición de la cola, en el caso de que exista.
+ * Se encargará de gestionar la siguiente petición de la cola, en el caso de que exista.
  * Devuelve el PID del proceso que ha terminado su operación de E/S
- * Creado TODO V5
+ * Creado V5
  */
 int OperatingSystem_DeviceControlerEndIOOperation() {
-	int PID = QueueFIFO_poll(IOWaitingProcessesQueue, &numberOfIOWaitingProcesses);
+#ifdef DEVICE
+	int PID = QueueFIFO_poll(IOWaitingProcessesQueue,
+			&numberOfIOWaitingProcesses);
 	Device_PrintIOResult();
 	return PID;
+#else
+	return -1;
+#endif
 }

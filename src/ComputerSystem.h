@@ -26,7 +26,7 @@ void ComputerSystem_PrintProgramList();
 #define SHORTTERMSCHEDULE 's'   // Only messages related to the short term scheduler of the operating system
 #define ERROR 'e'				// Error messages
 #define CLOCK 'c'				// Clock time messages
-#define DEVICE 'v'
+//#define DEVICE 'v'			//TODO Comentar para desactivar la V5
 
 // Basic data to collect about every program to be created
 // User programs specified in the command line: name of the file, the time of its arrival time
