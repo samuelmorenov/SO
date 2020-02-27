@@ -1,4 +1,0 @@
-Samuel Moreno Vincent
-UO266321
-He utilizado los ficheros proporcionados por los profesores para probar el simulador
-Para activar/desactivar la V5 solo hay que descomentar/comentar la linea 29 de ComputerSystem.h "#define DEVICE 'v'"
