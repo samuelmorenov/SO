@@ -1,6 +1,13 @@
-# **SISTEMAS OPERATIVOS**
-*CURSO 2018-2019*
+# [SO]  Sistemas Operativos
+
 ## Simulador de un Sistema Informático Multiprogramado
-## *Samuel Moreno Vincent*
-### Uniovi
+
+*Escuela de Ingeniería Informática - Uniovi*
+
+Proyecto realizado por:
+
+**Samuel Moreno Vincent**
+
+Entrega realizada en el año 2019
+
 Realización de un simulador de un sistema informático multiprogramado para la asignatura de sistemas operativos
